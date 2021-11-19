@@ -10,10 +10,6 @@ class Game(Layout):
     def __init__(self, **kwargs):
         Window.system_size = (1450, 800)
         super().__init__(**kwargs)
-        """dk = Image(source="0.png")
-        dk.size = (2000, 2000)
-        dk.pos
-        self.add_widget(dk)"""
         self.card_list = []  # empty list of integers in the length of 36
         self.create_cards()
         self.deck = []  # list of cards that represents the deck
@@ -63,12 +59,11 @@ class Game(Layout):
             self.add_widget(self.comp[-1])
             self.deck.pop(0)
 
-            """self.add_widget(Place(450, 650))
-            self.add_widget(Place(450, 425))
-            #self.add_widget(Place(450, 800))
-            self.add_widget(Place(450, 200))
-            self.add_widget(Place(450, -25))
-            self.add_widget(Place(450, 875))"""
+        y = 600
+        x = 400
+        dif = 225
+        for i in range(1, 6+1):
+            self.add_widget(Place(y, x + dif*i))
 
         # adding and displaying the bottom card and the deck
         self.koser = self.deck[0].kind
@@ -144,6 +139,8 @@ class Game(Layout):
                     tmp = i
         return tmp
 
+    """def magn(self, x, y):
+        """
     def run(self):  # runs the game
         selected = 0
         player_turn = True

@@ -13,7 +13,7 @@ class Place(Scatter):
         self.x = 125
         self.scale = 3
         self.do_translation = False
-        name = "Border.png"  # defines the file name that contains this card
+        name = "Images/Border.png"  # defines the file name that contains this card
         image = Image(source=name)
         self.add_widget(image)  # adding the image
 
@@ -27,7 +27,7 @@ class Place(Scatter):
         self.y = int(x)  # | 6-10 normal | 11 - Jack | 12 - Queen | 13 - King | 14 - Ace |
         self.x = int(y)  # | 0 - not set | 1 - heart | 2 - Spades | 3 - Clubs | 4 - Diamonds |
         self.do_translation = False
-        name = "Border.png"  # defines the file name that contains this card
+        name = "Images/Border.png"  # defines the file name that contains this card
         image = Image(source=name)
         self.add_widget(image)  # adding the image
 
