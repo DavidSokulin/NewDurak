@@ -1,5 +1,6 @@
 import random
 from kivy.uix.layout import Layout
+from kivy.uix.button import Button
 from Card import Card
 from Place import Place
 from kivy.core.window import Window
@@ -22,6 +23,20 @@ class Game(Layout):
         self.distribute_cards()
         self.board = []  # list of cards that represents the cards on the board
         self.not_in_game = []  # cards that arent in the game
+        bit = Button(text='Bita', font_size=50)
+        bit.x = 250
+        bit.y = 575
+        bit.color = (1, 1, 1, 1)
+        bit.background_color = (0, 0, 0, 0)
+        tk = Button(text='Take', font_size=50)
+        tk.x = 250
+        tk.y = 775
+        tk.color = (1, 1, 1, 1)
+        tk.background_color = (0, 0, 0, 0)
+        bit.bind(on_press=self.bita)
+        tk.bind(on_press=self.take_pl)
+        self.add_widget(bit)
+        self.add_widget(tk)
         self.run()
 
     def create_cards(self):  # creates random card deck
@@ -59,12 +74,12 @@ class Game(Layout):
             self.add_widget(self.comp[-1])
             self.deck.pop(0)
 
-        y = 600
+        """y = 600
         x = 400
         dif = 225
         for i in range(1, 6+1):
             self.add_widget(Place(y, x + dif*i))
-
+        """
         # adding and displaying the bottom card and the deck
         self.koser = self.deck[0].kind
         self.bottom_card = self.deck[0]
@@ -113,12 +128,17 @@ class Game(Layout):
             else:
                 return False
 
-    def take(self, lis_play):
+    def take_pl(self, touch):
         while len(self.board):
-            lis_play.append(self.board[0])
+            self.player.append(self.board[0])
             self.board.pop(0)
 
-    def bita(self):
+    def take_cp(self):
+        while len(self.board):
+            self.comp.append(self.board[0])
+            self.board.pop(0)
+
+    def bita(self, touch):
         while len(self.board) > 0:
             self.not_in_game.append(self.board[0])
             self.board.pop(0)
@@ -156,7 +176,7 @@ class Game(Layout):
                 if selected == -1 and attacker:  # if the computer does not have an available move
                     self.take(self.comp)
                 elif selected == -1 and not attacker:  # the comp does not have an available move and turn is finished
-                    self.bita()
+                    self.bita(1)
                 else:
                     self.move(self.comp, selected)
                     self.valid_move(selected, self.comp)

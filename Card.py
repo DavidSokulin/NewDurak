@@ -32,15 +32,36 @@ class Card(Scatter):
         self.add_widget(image)  # adding the image
 
     def on_touch_down(self, touch):
-        # if self.collide_point(*touch.pos):
-        """print("touch x:" + str(touch.x))
-        print("touch y:" + str(touch.y))
-        print(self.pos)"""
         return super().on_touch_down(touch)
 
-    """def on_touch_up(self, touch):
-        if touch.y < 450:
-            self.parent.Game.magn(touch.x, touch.y)
-        print("touch x:" + str(touch.x))
-        print("touch y:" + str(touch.y))
-        print(self.pos)"""
+    def on_touch_up(self, touch):  # magnitizes cards to a specific location
+        if touch.y < 550:
+            if self.do_translation and self.y < 450:
+                self.y = 50
+                if 0 < self.x < 750:
+                    self.x = 675
+                if 750 < self.x < 950:
+                    self.x = 875
+                if 950 < self.x < 1150:
+                    self.x = 1075
+                if 1150 < self.x < 1350:
+                    self.x = 1275
+                if 1350 < self.x < 1600:
+                    self.x = 1475
+                if 1600 < self.x < 2200:
+                    self.x = 1675
+        if self.do_translation and 400 < self.y < 850:
+            self.y = 600
+            if 0 < self.x < 750:
+                self.x = 600
+            if 750 < self.x < 950:
+                self.x = 825
+            if 950 < self.x < 1150:
+                self.x = 1050
+            if 1150 < self.x < 1350:
+                self.x = 1275
+            if 1350 < self.x < 1600:
+                self.x = 1500
+            if 1600 < self.x < 2200:
+                self.x = 1725
+        return super().on_touch_up(touch)
