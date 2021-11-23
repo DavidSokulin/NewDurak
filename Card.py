@@ -14,11 +14,32 @@ class Card(Scatter):
         self.kind = int(kind)  # | 0 - not set | 1 - heart | 2 - Spades | 3 - Clubs | 4 - Diamonds |
         self.y = 50
         self.x = 675
+        self.distance = self.dist()
+        self.cards_in_deck = 1
+        self.board_loc = []
+        #self.create_board_loc()
+        self.player_loc = []
+        #self.create_player_loc()
         self.do_translation = True
         name = self.get_name()  # defines the file name that contains this card
         image = Image(source=name)
         self.add_widget(image)  # adding the image
 
+    def dist(self):
+        starting_x = 200
+        end_x = 2750
+        max_dist = 200
+        dist = end_x - starting_x
+        dist = dist/self.cards_in_deck
+        if dist < max_dist:
+            f_dist = dist
+        else:
+            f_dist = max_dist
+        return dist
+        #for i in range(self.cards_in_deck):
+            #self.board_loc[i] = (x_loc, y_loc)
+   """ def create_player_loc(self):
+        self."""
     def get_name(self):
         if not self.value == 0:
             name = "Images/" + str(self.kind) + "_" + str(self.value) + ".png"
@@ -50,7 +71,9 @@ class Card(Scatter):
                     self.x = 1475
                 if 1600 < self.x < 2200:
                     self.x = 1675
-        if self.do_translation and 400 < self.y < 850:
+        print(touch.x)
+
+        if self.do_translation and 400 < self.y < 950:
             self.y = 600
             if 0 < self.x < 750:
                 self.x = 600
