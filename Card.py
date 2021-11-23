@@ -37,9 +37,10 @@ class Card(Scatter):
             f_dist = max_dist
         return dist
         #for i in range(self.cards_in_deck):
-            #self.board_loc[i] = (x_loc, y_loc)
-   """ def create_player_loc(self):
-        self."""
+        #self.board_loc[i] = (x_loc, y_loc)
+        """ def create_player_loc(self):
+            self."""
+        
     def get_name(self):
         if not self.value == 0:
             name = "Images/" + str(self.kind) + "_" + str(self.value) + ".png"
