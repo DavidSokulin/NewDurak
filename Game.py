@@ -2,7 +2,6 @@ import random
 from kivy.uix.layout import Layout
 from kivy.uix.button import Button
 from Card import Card
-from Place import Place
 from kivy.core.window import Window
 from kivy.app import App
 
@@ -21,8 +20,16 @@ class Game(Layout):
         self.koser = 0  # integer that represents the kind of the koser
         self.bottom_card = Card(0, 0)  # card that is flipped at the bottom of the deck (determines koser kind)
         self.distribute_cards()
+        self.set_koser()
+        self.update(self.player, 1, 1)
+        self.update(self.comp, 1, 3)
         self.board = []  # list of cards that represents the cards on the board
         self.not_in_game = []  # cards that arent in the game
+        self.create_buttons()
+        #self.run()
+        print()
+
+    def create_buttons(self):
         bit = Button(text='Bita', font_size=50)
         bit.x = 250
         bit.y = 575
@@ -37,7 +44,6 @@ class Game(Layout):
         tk.bind(on_press=self.take_pl)
         self.add_widget(bit)
         self.add_widget(tk)
-        self.run()
 
     def create_cards(self):  # creates random card deck
         for i in range(1, 4+1):
@@ -51,35 +57,38 @@ class Game(Layout):
 
         for i in range(36):
             x = random.randint(0, i)
-            if not index_list[x] == 1000:
-                self.deck.append(self.card_list[index_list[x]])
-                index_list[x] = 1000
+            while index_list[x] == 1000:
+                x = random.randint(0, i)
+            self.deck.append(self.card_list[index_list[x]])
+            index_list[x] = 1000
 
     def distribute_cards(self):  # distributes 6 cards to each player
-        for i in range(6):
+        self.comp.append(self.deck[0])  # adding card to computer
+        self.comp[0].comp_card(1225)
+        self.add_widget(self.comp[0])
+        self.comp[0].index = 0
+        self.deck.pop(0)  # removing the added card from the deck
+
+        self.player.append(self.deck[0])  # adding card to player
+        self.add_widget(self.player[0])
+        self.player[0].index = 0
+        self.deck.pop(0)  # removing the added card from the deck
+
+        for i in range(1, 6):
             self.player.append(self.deck[0])  # adding card to player
-            if len(self.player) > 1:  # changing graphic characteristics
-                self.player[-1].x = self.player[-2].x + 200
+            self.player[-1].x = self.player[-2].x + 200
+            self.player[-1].index = i
             self.add_widget(self.player[-1])
             self.deck.pop(0)  # removing the added card from the deck
+
             self.comp.append(self.deck[0])  # adding card to computer
-            self.comp[0].y = 1225  # changing graphic characteristics
-            self.comp[0].hide_cards()  # chiding the card in the ui
-            self.comp[0].do_translation = False
-            if len(self.comp) > 1:  # changing graphic characteristics
-                self.comp[-1].x = self.comp[-2].x + 200
-                self.comp[-1].y = 1225
-                self.comp[-1].hide_cards()  # chiding the card in the ui
-                self.comp[-1].do_translation = False
+            self.comp[-1].x = self.comp[-2].x + 200
+            self.comp[-1].comp_card(1225)
+            self.comp[-1].index = i
             self.add_widget(self.comp[-1])
             self.deck.pop(0)
 
-        """y = 600
-        x = 400
-        dif = 225
-        for i in range(1, 6+1):
-            self.add_widget(Place(y, x + dif*i))
-        """
+    def set_koser(self):
         # adding and displaying the bottom card and the deck
         self.koser = self.deck[0].kind
         self.bottom_card = self.deck[0]
@@ -104,6 +113,94 @@ class Game(Layout):
         while len(cur_play) < 6 and len(self.deck) > 0:  # player card fill up
             cur_play.append(self.deck[0])
             self.deck.pop(0)
+
+    def update_lists(self, org_list, new_list, index):
+        new_list.append(org_list[index])
+        org_list.pop(index)
+        self.update_index(new_list)
+        self.update_index(org_list)
+
+    def update_index(self, list):
+        for i in range(len(list)):
+            list[i].index = i
+
+    def update(self, org_list, new_list, index, dest_y):
+        self.update_lists(org_list, new_list, index)
+        first_c = 0
+        if len(org_list) > 0:
+            org_y = org_list[0].y
+            if org_y == 50:
+                first_c = self.distance_between(len(org_list))
+                new_list.append(org_list.pop(index))
+            elif org_y == 600:
+                first_c = self.distance_between(len(org_list))
+                new_list.append(org_list.pop(index))
+            elif org_y == 1225:
+                first_c = self.distance_between(len(org_list))
+                new_list.append(org_list.pop(index))
+            if first_c != 0:
+                new_list[-1].y = dest_y
+                self.update_loc(org_list, new_list, first_c)  # need to write update_loc function that updates the locations of cards according to the info it is given
+
+
+    def distance_between(self, length):
+        starting_x = 0
+        end_x = int(2550)
+        mid = int(end_x / 2)
+        max_dist = int(200)
+        dist = int(end_x - starting_x)
+        dist = int(dist / length)
+        if dist < max_dist:
+            f_dist = int(dist)
+        else:
+            f_dist = int(max_dist)
+        if int(length) % 2 == 0:
+            mid = mid + f_dist / 2
+        first_c = mid - f_dist * int(length / 2)
+        return first_c
+
+    """def update(self, list, layer):
+        length = len(list)
+        if length > 0:
+            starting_x = 0
+            end_x = int(2550)
+            mid = int(end_x/2)
+            max_dist = int(200)
+            dist = int(end_x - starting_x)
+            dist = int(dist / length)
+            if dist < max_dist:
+                f_dist = int(dist)
+            else:
+                f_dist = int(max_dist)
+            if int(length) % 2 == 0:
+                mid = mid + f_dist/2
+            first_c = mid - f_dist * int(length/2)
+
+            if layer == 1:
+                loc_y = 50
+            elif layer == 2:
+                loc_y = 600
+            else:
+                loc_y = 1225
+            i = 0
+            while i < length:
+                list[i].x = first_c + i * f_dist
+                print("Before" + str(list[i].x))
+                if list[i].y != 50 and list[i].y != 600 and list[i].y != 1225:
+                    list[i].y = loc_y
+                    if layer == 2:
+                        self.board.append(list[i])
+                    elif layer == 1:
+                        self.player.append(list[i])
+                    elif layer == 3:
+                        self.comp.append(list[i])
+                    print("After" + str(list[i].x))
+                    list.pop(i)
+                length = len(list)
+                i = i + 1
+            #def update_board(slef):
+        #elif layer == 1:"""
+
 
     def valid_move(self, selected, cur_play):  # checks to see if the move that was made by the player is valid
         if len(self.board) > 0 and len(cur_play) > 0 and selected >= 0:
@@ -159,14 +256,13 @@ class Game(Layout):
                     tmp = i
         return tmp
 
-    """def magn(self, x, y):
-        """
     def run(self):  # runs the game
         selected = 0
         player_turn = True
         attacker = True
         while not self.win():  # runs the game until someone wins
             if player_turn:  # players turn
+
                 self.move(self.player, selected)
                 self.valid_move(selected, self.player)
                 self.after_turn(self.player)
