@@ -15,7 +15,8 @@ class Card(Scatter):
         self.y = 50
         #self.x = 675
         self.x = 1275
-        self.index = 0
+        self.origin = 0  # | 0 - not set | 1 - player | 2 - board | 3 - computer |
+        self.index = -1
         self.cards_in_deck = 1
         self.board_loc = []
         self.player_loc = []
@@ -45,9 +46,14 @@ class Card(Scatter):
         return super().on_touch_down(touch)
 
     def on_touch_up(self, touch):  # magnitizes cards to a specific location
-        if self.kind != 0:
-            if self.y > 500:
-                self.parent.update(self.parent.player, 2)
-            else:
-                self.parent.update(self.parent.board, 1)
+        print(self.y)
+        if self.kind != 0:  # (self, org_list, new_list, index, dest_y)
+            if self.y > 300 and self.y != 600 and self.y != 1225 and self.origin == 1:
+                self.parent.update(self.parent.player, self.parent.board, self.index, 50, 600)
+            elif self.y < 300 and self.y != 50 and self.origin == 2:
+                self.parent.update(self.parent.board, self.parent.player, self.index, 600, 50)
+            elif self.y < 300 and self.origin == 1:
+                self.parent.update_loc(self.parent.player, 50)
+            elif self.y > 300 and self.origin == 2:
+                self.parent.update_loc(self.parent.board, 600)
         return super().on_touch_up(touch)

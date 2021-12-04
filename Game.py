@@ -21,11 +21,13 @@ class Game(Layout):
         self.bottom_card = Card(0, 0)  # card that is flipped at the bottom of the deck (determines koser kind)
         self.distribute_cards()
         self.set_koser()
-        self.update(self.player, 1, 1)
-        self.update(self.comp, 1, 3)
+        self.update_loc(self.player, 50)
+        self.update_loc(self.comp, 1225)
         self.board = []  # list of cards that represents the cards on the board
         self.not_in_game = []  # cards that arent in the game
         self.create_buttons()
+        self.upd = False  # has already been updated
+        self.call_count = 0   # number of time the update function has been called in the past turn
         #self.run()
         print()
 
@@ -56,9 +58,9 @@ class Game(Layout):
             index_list.append(i)
 
         for i in range(36):
-            x = random.randint(0, i)
+            x = random.randint(0, 35)
             while index_list[x] == 1000:
-                x = random.randint(0, i)
+                x = random.randint(0, 35)
             self.deck.append(self.card_list[index_list[x]])
             index_list[x] = 1000
 
@@ -67,17 +69,20 @@ class Game(Layout):
         self.comp[0].comp_card(1225)
         self.add_widget(self.comp[0])
         self.comp[0].index = 0
+        self.comp[0].origin = 3
         self.deck.pop(0)  # removing the added card from the deck
 
         self.player.append(self.deck[0])  # adding card to player
         self.add_widget(self.player[0])
         self.player[0].index = 0
+        self.player[-1].origin = 1
         self.deck.pop(0)  # removing the added card from the deck
 
         for i in range(1, 6):
             self.player.append(self.deck[0])  # adding card to player
             self.player[-1].x = self.player[-2].x + 200
             self.player[-1].index = i
+            self.player[-1].origin = 1
             self.add_widget(self.player[-1])
             self.deck.pop(0)  # removing the added card from the deck
 
@@ -85,6 +90,7 @@ class Game(Layout):
             self.comp[-1].x = self.comp[-2].x + 200
             self.comp[-1].comp_card(1225)
             self.comp[-1].index = i
+            self.comp[-1].origin = 3
             self.add_widget(self.comp[-1])
             self.deck.pop(0)
 
@@ -115,48 +121,82 @@ class Game(Layout):
             self.deck.pop(0)
 
     def update_lists(self, org_list, new_list, index):
-        new_list.append(org_list[index])
-        org_list.pop(index)
+        new_list.append(org_list.pop(index))
         self.update_index(new_list)
         self.update_index(org_list)
+        if len(org_list) > 0:
+            if org_list[0].y == 50:
+                org_origin = 1
+            elif org_list[0].y == 600:
+                org_origin = 2
+            elif org_list[0].y == 1225:
+                org_origin = 3
+        else:
+            if new_list[0].origin == 1:
+                org_origin = 2
+            else:
+                org_origin = 1
+        if len(new_list) > 1:
+            if new_list[0].y == 50:
+                new_origin = 1
+            elif new_list[0].y == 600:
+                new_origin = 2
+            elif new_list[0].y == 1225:
+                new_origin = 3
+        else:
+            if org_origin == 1:
+                new_origin = 2
+            else:
+                new_origin = 1
+        self.update_origin(org_list, org_origin)
+        self.update_origin(new_list, new_origin)
+
+    def update_origin(self, list, origin):
+        for i in range(len(list)):
+            list[i].origin = origin
 
     def update_index(self, list):
         for i in range(len(list)):
             list[i].index = i
 
-    def update(self, org_list, new_list, index, dest_y):
-        self.update_lists(org_list, new_list, index)
-        first_c = 0
-        if len(org_list) > 0:
-            org_y = org_list[0].y
-            if org_y == 50:
-                first_c = self.distance_between(len(org_list))
-                new_list.append(org_list.pop(index))
-            elif org_y == 600:
-                first_c = self.distance_between(len(org_list))
-                new_list.append(org_list.pop(index))
-            elif org_y == 1225:
-                first_c = self.distance_between(len(org_list))
-                new_list.append(org_list.pop(index))
-            if first_c != 0:
-                new_list[-1].y = dest_y
-                self.update_loc(org_list, new_list, first_c)  # need to write update_loc function that updates the locations of cards according to the info it is given
+    def update(self, org_list, new_list, index, org_y, dest_y):
+        self.call_count = self.call_count + 1
+        if len(org_list) > index:
+            self.update_lists(org_list, new_list, index)
+            if len(org_list):
+                self.update_loc(org_list, org_y)
+            new_list[-1].y = dest_y
+            self.update_loc(new_list, dest_y)
+            self.upd = True
+        if self.call_count == 2:
+            self.call_count = 0
+            self.upd = False
 
+    def update_loc(self, list, cor_y):
+        first_c = self.distance_between(len(list))
+        for i in range(len(list)):
+            list[i].y = cor_y
+            list[i].x = first_c + i * 200
 
     def distance_between(self, length):
-        starting_x = 0
-        end_x = int(2550)
-        mid = int(end_x / 2)
-        max_dist = int(200)
-        dist = int(end_x - starting_x)
-        dist = int(dist / length)
-        if dist < max_dist:
-            f_dist = int(dist)
+        if length > 0:
+            starting_x = 0
+            end_x = int(2550)
+            mid = int(end_x / 2)
+            max_dist = int(200)
+            dist = int(end_x - starting_x)
+            dist = int(dist / length)
+            if dist < max_dist:
+                f_dist = int(dist)
+            else:
+                f_dist = int(max_dist)
+            if int(length) % 2 == 0:
+                mid = mid + f_dist / 2
+            first_c = mid - f_dist * int(length / 2)
         else:
-            f_dist = int(max_dist)
-        if int(length) % 2 == 0:
-            mid = mid + f_dist / 2
-        first_c = mid - f_dist * int(length / 2)
+            end_x = int(2550)
+            mid = int(end_x / 2)
+            first_c = mid
         return first_c
 
     """def update(self, list, layer):
@@ -200,7 +240,6 @@ class Game(Layout):
                 i = i + 1
             #def update_board(slef):
         #elif layer == 1:"""
-
 
     def valid_move(self, selected, cur_play):  # checks to see if the move that was made by the player is valid
         if len(self.board) > 0 and len(cur_play) > 0 and selected >= 0:
