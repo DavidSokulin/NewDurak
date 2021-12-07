@@ -38,7 +38,17 @@ class Card(Scatter):
 
     def hide_cards(self):
         self.do_translation = False
-        name = "Images/0.png"  # defines the file name that contains this card
+        """name = "Images/0.png"  # defines the file name that contains this card
+        image = Image(source=name)"""
+        name = "Images/" + str(self.kind) + "_" + str(
+            self.value) + ".png"  # defines the file name that contains this card
+        image = Image(source=name)
+        self.add_widget(image)  # adding the image
+
+    def unhide_cards(self):
+        self.do_translation = False
+        name = "Images/" + str(self.kind) + "_" + str(
+            self.value) + ".png"  # defines the file name that contains this card
         image = Image(source=name)
         self.add_widget(image)  # adding the image
 
@@ -50,10 +60,13 @@ class Card(Scatter):
         if self.kind != 0:  # (self, org_list, new_list, index, dest_y)
             if self.y > 300 and self.y != 600 and self.y != 1225 and self.origin == 1:
                 self.parent.update(self.parent.player, self.parent.board, self.index, 50, 600)
+                self.parent.run()
             elif self.y < 300 and self.y != 50 and self.origin == 2:
                 self.parent.update(self.parent.board, self.parent.player, self.index, 600, 50)
+                self.parent.run()
             elif self.y < 300 and self.origin == 1:
                 self.parent.update_loc(self.parent.player, 50)
             elif self.y > 300 and self.origin == 2:
                 self.parent.update_loc(self.parent.board, 600)
+
         return super().on_touch_up(touch)
