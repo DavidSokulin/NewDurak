@@ -1,4 +1,3 @@
-import copy
 import random
 from kivy.uix.layout import Layout
 from kivy.uix.button import Button
@@ -121,34 +120,41 @@ class Game(Layout):
         self.update_loc(self.board, 600)
 
     def after_turn(self):  # distributes cards after the turn so that everyone has 6 cards or deck is empty
-        if self.turn:
+        if not self.turn:
             while len(self.player) < 6 and len(self.deck) > 0:  # player card fill up
                 self.player.append(self.deck.pop(0))
                 self.player[-1].y = 50
                 self.player[-1].unhide_cards()
-                if len(self.deck) > 0 and len(self.comp) < 6:
-                    self.comp.append(self.deck.pop(0))
-                    self.comp[-1].y = 1225
-                    self.comp[-1].unhide_cards()
-            while len(self.deck) > 0 and len(self.comp) < 6:
+                self.player[-1].origin = 1
+                self.player[-1].do_translation = True
+                self.add_widget(self.player[-1])
+            while len(self.comp) < 6 and len(self.deck) > 0:
                 self.comp.append(self.deck.pop(0))
                 self.comp[-1].y = 1225
                 self.comp[-1].unhide_cards()
+                self.comp[-1].origin = 3
+                self.add_widget(self.comp[-1])
         else:
-            while len(self.comp) < 6 and len(self.deck) > 0:  # player card fill up
+            while len(self.comp) < 6 and len(self.deck) > 0:  # computer card fill up
                 self.comp.append(self.deck.pop(0))
                 self.comp[-1].y = 1225
                 self.comp[-1].unhide_cards()
-                if len(self.deck) > 0 and len(self.player) < 6:
-                    self.player.append(self.deck.pop(0))
-                    self.player[-1].y = 50
-                    self.player[-1].unhide_cards()
-            while len(self.deck) > 0 and len(self.player) < 6:
+                self.comp[-1].origin = 3
+                self.add_widget(self.comp[-1])
+            while len(self.player) < 6 and len(self.deck) > 0:
                 self.player.append(self.deck.pop(0))
                 self.player[-1].y = 50
                 self.player[-1].unhide_cards()
+                self.player[-1].origin = 1
+                self.player[-1].do_translation = True
+                self.add_widget(self.player[-1])
 
         self.update_loc(self.player, 50)
+        self.update_loc(self.comp, 1225)
+
+    def update_all_loc(self):
+        self.update_loc(self.player, 50)
+        self.update_loc(self.board, 600)
         self.update_loc(self.comp, 1225)
 
     def update_lists(self, org_list, new_list, index):  # updates the lists accordingly
@@ -199,23 +205,19 @@ class Game(Layout):
             self.update_loc(new_list, dest_y)
 
     def update_loc(self, list, cor_y):
-        first_c = self.distance_between(len(list))
-        for i in range(len(list)):
-            list[i].y = cor_y
-            list[i].x = first_c + i * 200
+        if len(list) > 0:
+            first_c = self.distance_between(len(list))
+            dist = self.distance(len(list))
+            for i in range(len(list)):
+                list[i].y = cor_y
+                list[i].x = first_c + i * dist
 
     def distance_between(self, length):
         if length > 0:
             starting_x = 0
             end_x = int(2550)
             mid = int(end_x / 2)
-            max_dist = int(200)
-            dist = int(end_x - starting_x)
-            dist = int(dist / length)
-            if dist < max_dist:
-                f_dist = int(dist)
-            else:
-                f_dist = int(max_dist)
+            f_dist = self.distance(length)
             if int(length) % 2 == 0:
                 mid = mid + f_dist / 2
             first_c = mid - f_dist * int(length / 2)
@@ -224,6 +226,19 @@ class Game(Layout):
             mid = int(end_x / 2)
             first_c = mid
         return first_c
+
+    def distance(self, length):
+        starting_x = 0
+        end_x = int(2550)
+        mid = int(end_x / 2)
+        max_dist = int(200)
+        dist = int(end_x - starting_x)
+        dist = int(dist / length)
+        if dist < max_dist:
+            f_dist = int(dist)
+        else:
+            f_dist = int(max_dist)
+        return f_dist
 
     def valid_move(self, selected, cur_play):  # checks to see if the move that was made by the player is valid
         if len(self.board) > 0 and len(cur_play) > 0 and selected >= 0:
@@ -251,35 +266,34 @@ class Game(Layout):
             return 0
 
     def take_ply(self, touch):
-        self.take(self.player)
+        self.take(self.player, True)
         self.update_loc(self.player, 50)
         self.turn = False
         self.attacker = False
+        self.after_turn()
         self.run()
 
-    def take(self, list):
+    def take(self, list, pl):
         while len(self.board):
             list.append(self.board.pop(0))
             list[-1].origin = 1
             list[-1].y = 1225
+            if pl:
+                list[-1].do_translation = True
         self.update_index(list)
         self.update_loc(list, 1225)
-
         self.after_turn()
 
-        if self.turn:
-            self.turn = False
-        else:
-            self.turn = True
-
     def bita(self, touch):
-        while len(self.board) > 0:
+        if len(self.not_in_game) == 0 and len(self.board) > 0:
             self.not_in_game.append(self.board.pop(0))
             self.not_in_game[-1].y = 1100
             self.not_in_game[-1].x = 50
-            self.not_in_game[-1].do_translation = True
+            self.not_in_game[-1].hide_cards()
 
-        self.after_turn()
+        while len(self.board) > 0:
+            self.not_in_game.append(self.board.pop(0))
+            self.remove_widget(self.not_in_game[-1])
 
         if self.turn:
             self.turn = False
@@ -291,6 +305,8 @@ class Game(Layout):
         else:
             self.attacker = True
 
+        self.after_turn()
+
         if not self.attacker and not self.turn:
             self.run()
 
@@ -298,23 +314,31 @@ class Game(Layout):
         min_card = 15
         tmp = -1
         if self.attacker:
-            for i in range(len(self.comp) - 1):
+            for i in range(len(self.comp)):
                 if self.comp[i].kind == self.board[-1].kind:
                     if self.comp[i].value > self.board[-1].value:
                         if self.comp[i].value < min_card:
                             min_card = self.comp[i].value
                             tmp = i
             if min_card == 15 and not self.board[-1].kind == self.koser:
-                for i in range(len(self.comp) - 1):
+                for i in range(len(self.comp)):
                     if self.comp[i].kind == self.koser and self.comp[i].value < min_card:
                         min_card = self.comp[i].value
                         tmp = i
         else:
-            for i in range(len(self.comp) - 1):
-                if not self.comp[i].kind == self.koser:
-                    if self.comp[i].value < min_card:
-                        min_card = self.comp[i].value
-                        tmp = i
+            if len(self.board) == 0:
+                for i in range(len(self.comp)):
+                    if not self.comp[i].kind == self.koser:
+                        if self.comp[i].value < min_card:
+                            min_card = self.comp[i].value
+                            tmp = i
+            else:
+                for i in range(len(self.comp)):
+                    for j in range(len(self.board)):
+                        if self.comp[i].value == self.board[j].value:
+                            if self.comp[i].value < min_card:
+                                min_card = self.comp[i].value
+                                tmp = i
         return tmp
 
     def legal(self):
@@ -333,11 +357,10 @@ class Game(Layout):
                     return False
         else:
             if len(self.board) > 0:
-                for i in range(len(self.board) - 2):
+                for i in range(len(self.board) - 1):
                     if self.board[-1].value == self.board[i].value:
                         return True
-                    else:
-                        return False
+                return False
             else:
                 return True
 
@@ -346,11 +369,21 @@ class Game(Layout):
             list.append(self.board.pop(-1))
             list[-1].index = len(list) - 1
             list[-1].origin = origin
+            y = self.find_y_by_origin(origin)
+            self.update_loc(list, y)
+
+    def find_y_by_origin(self, origin):
+        if origin == 1:
+            return 50
+        elif origin == 2:
+            return 600
+        elif origin == 3:
+            return 1225
 
     def computer(self):
         selected = self.find_move()
         if selected == -1 and self.attacker:  # if the computer does not have an available move
-            self.take(self.comp)
+            self.take(self.comp, False)
             self.update_loc(self.comp, 1225)
 
         elif selected == -1 and not self.attacker:  # the comp does not have an available move and turn is finished
@@ -362,7 +395,7 @@ class Game(Layout):
             while not self.legal():
                 self.revert(self.comp, 3)
                 print("Not a valid move please try again")
-            self.after_turn()
+            self.update_all_loc()
 
     def run(self):  # runs the game
         if self.win() == 0:  # runs the game until someone wins
@@ -372,13 +405,22 @@ class Game(Layout):
                     print("Not a valid move please try again")
                 else:
                     self.computer()
+                    self.update_all_loc()
 
             else:  # computers turn
+                if not self.legal():
+                    self.revert(self.player, 1)
+                    print("Not a valid move please try again")
+                    return
                 selected = self.find_move()
                 if selected == -1 and self.attacker:  # if the computer does not have an available move
-                    self.take(self.comp)
+                    self.take(self.comp, False)
+                    self.update_all_loc()
                 elif selected == -1 and not self.attacker:  # the comp does not have an available move and turn is finished
                     self.bita(1)
+                    self.attacker = True
+                    self.turn = True
+                    self.update_all_loc()
                 else:
                     self.move(self.comp, selected)
                     while not self.legal():
