@@ -121,33 +121,62 @@ class Game(Layout):
 
     def after_turn(self):  # distributes cards after the turn so that everyone has 6 cards or deck is empty
         if not self.turn:
-            while len(self.player) < 6 and len(self.deck) > 0:  # player card fill up
+            while len(self.player) < 6 and len(self.deck) > 1:  # player card fill up
                 self.player.append(self.deck.pop(0))
                 self.player[-1].y = 50
                 self.player[-1].unhide_cards()
                 self.player[-1].origin = 1
                 self.player[-1].do_translation = True
                 self.add_widget(self.player[-1])
-            while len(self.comp) < 6 and len(self.deck) > 0:
+            while len(self.comp) < 6 and len(self.deck) > 1:
                 self.comp.append(self.deck.pop(0))
                 self.comp[-1].y = 1225
                 self.comp[-1].unhide_cards()
                 self.comp[-1].origin = 3
                 self.add_widget(self.comp[-1])
+            if len(self.player) < 6 and len(self.deck) == 1:
+                self.player.append(self.deck.pop(0))
+                self.player[-1].y = 50
+                self.player[-1].unhide_cards()
+                self.player[-1].origin = 1
+                self.player[-1].do_translation = True
+                self.player[-1].rotation = 0
+
+            elif len(self.comp) < 6 and len(self.deck) == 1:
+                self.comp.append(self.deck.pop(0))
+                self.comp[-1].y = 1225
+                self.comp[-1].unhide_cards()
+                self.comp[-1].origin = 3
+                self.comp[-1].rotation = 0
         else:
-            while len(self.comp) < 6 and len(self.deck) > 0:  # computer card fill up
+            while len(self.comp) < 6 and len(self.deck) > 1:  # computer card fill up
                 self.comp.append(self.deck.pop(0))
                 self.comp[-1].y = 1225
                 self.comp[-1].unhide_cards()
                 self.comp[-1].origin = 3
                 self.add_widget(self.comp[-1])
-            while len(self.player) < 6 and len(self.deck) > 0:
+            while len(self.player) < 6 and len(self.deck) > 1:
                 self.player.append(self.deck.pop(0))
                 self.player[-1].y = 50
                 self.player[-1].unhide_cards()
                 self.player[-1].origin = 1
                 self.player[-1].do_translation = True
                 self.add_widget(self.player[-1])
+
+            if len(self.comp) < 6 and len(self.deck) == 1:
+                self.comp.append(self.deck.pop(0))
+                self.comp[-1].y = 1225
+                self.comp[-1].unhide_cards()
+                self.comp[-1].origin = 3
+                self.comp[-1].rotation = 0
+
+            elif len(self.player) < 6 and len(self.deck) == 1:
+                self.player.append(self.deck.pop(0))
+                self.player[-1].y = 50
+                self.player[-1].unhide_cards()
+                self.player[-1].origin = 1
+                self.player[-1].do_translation = True
+                self.player[-1].rotation = 0
 
         self.update_loc(self.player, 50)
         self.update_loc(self.comp, 1225)

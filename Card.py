@@ -56,7 +56,6 @@ class Card(Scatter):
         return super().on_touch_down(touch)
 
     def on_touch_up(self, touch):  # magnitizes cards to a specific location
-        print(self.y)
         if self.kind != 0:  # (self, org_list, new_list, index, dest_y)
             if self.y > 300 and self.y != 600 and self.y != 1225 and self.origin == 1:
                 self.parent.update(self.parent.player, self.parent.board, self.index, 50, 600)
