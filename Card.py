@@ -38,11 +38,11 @@ class Card(Scatter):
 
     def hide_cards(self):
         self.do_translation = False
-        """name = "Images/0.png"  # defines the file name that contains this card
-        image = Image(source=name)"""
-        name = "Images/" + str(self.kind) + "_" + str(
-            self.value) + ".png"  # defines the file name that contains this card
+        name = "Images/0.png"  # defines the file name that contains this card
         image = Image(source=name)
+        """name = "Images/" + str(self.kind) + "_" + str(
+            self.value) + ".png"  # defines the file name that contains this card
+        image = Image(source=name)"""
         self.add_widget(image)  # adding the image
 
     def unhide_cards(self):

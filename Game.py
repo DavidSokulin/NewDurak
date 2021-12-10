@@ -19,6 +19,7 @@ class Game(Layout):
         # | 0 - not set | 1 - heart | 2 - Spades | 3 - Clubs | 4 - Diamonds |
         self.koser = 0  # integer that represents the kind of the koser
         self.bottom_card = Card(0, 0)  # card that is flipped at the bottom of the deck (determines koser kind)
+        self.back_card = Card(0, 0)
         self.distribute_cards()
         self.set_koser()
         self.update_loc(self.player, 50)
@@ -105,11 +106,10 @@ class Game(Layout):
         self.bottom_card.y = 600
         self.bottom_card.rotation = 90
         self.add_widget(self.bottom_card)
-        back_card = Card(0, 0)
-        back_card.x = 2400
-        back_card.y = 600
-        back_card.do_translation = False
-        self.add_widget(back_card)
+        self.back_card.x = 2400
+        self.back_card.y = 600
+        self.back_card.do_translation = False
+        self.add_widget(self.back_card)
 
     def move(self, cur_play, selected):  # executes the move that was made
         self.board.append(cur_play.pop(selected))
@@ -117,7 +117,7 @@ class Game(Layout):
         self.board[-1].origin = 2
         self.board[-1].index = len(self.board) - 1
         self.board[-1].unhide_cards()
-        self.update_loc(self.board, 600)
+        self.update_all_loc()
 
     def after_turn(self):  # distributes cards after the turn so that everyone has 6 cards or deck is empty
         if not self.turn:
@@ -131,7 +131,7 @@ class Game(Layout):
             while len(self.comp) < 6 and len(self.deck) > 1:
                 self.comp.append(self.deck.pop(0))
                 self.comp[-1].y = 1225
-                self.comp[-1].unhide_cards()
+                self.comp[-1].hide_cards()
                 self.comp[-1].origin = 3
                 self.add_widget(self.comp[-1])
             if len(self.player) < 6 and len(self.deck) == 1:
@@ -141,18 +141,21 @@ class Game(Layout):
                 self.player[-1].origin = 1
                 self.player[-1].do_translation = True
                 self.player[-1].rotation = 0
+                self.remove_widget(self.back_card)
 
             elif len(self.comp) < 6 and len(self.deck) == 1:
                 self.comp.append(self.deck.pop(0))
                 self.comp[-1].y = 1225
-                self.comp[-1].unhide_cards()
+                self.comp[-1].hide_cards()
                 self.comp[-1].origin = 3
                 self.comp[-1].rotation = 0
+                self.remove_widget(self.back_card)
+
         else:
             while len(self.comp) < 6 and len(self.deck) > 1:  # computer card fill up
                 self.comp.append(self.deck.pop(0))
                 self.comp[-1].y = 1225
-                self.comp[-1].unhide_cards()
+                self.comp[-1].hide_cards()
                 self.comp[-1].origin = 3
                 self.add_widget(self.comp[-1])
             while len(self.player) < 6 and len(self.deck) > 1:
@@ -166,9 +169,10 @@ class Game(Layout):
             if len(self.comp) < 6 and len(self.deck) == 1:
                 self.comp.append(self.deck.pop(0))
                 self.comp[-1].y = 1225
-                self.comp[-1].unhide_cards()
+                self.comp[-1].hide_cards()
                 self.comp[-1].origin = 3
                 self.comp[-1].rotation = 0
+                self.remove_widget(self.back_card)
 
             elif len(self.player) < 6 and len(self.deck) == 1:
                 self.player.append(self.deck.pop(0))
@@ -177,6 +181,7 @@ class Game(Layout):
                 self.player[-1].origin = 1
                 self.player[-1].do_translation = True
                 self.player[-1].rotation = 0
+                self.remove_widget(self.back_card)
 
         self.update_loc(self.player, 50)
         self.update_loc(self.comp, 1225)
@@ -309,6 +314,8 @@ class Game(Layout):
             list[-1].y = 1225
             if pl:
                 list[-1].do_translation = True
+            else:
+                list[-1].hide_cards()
         self.update_index(list)
         self.update_loc(list, 1225)
         self.after_turn()
