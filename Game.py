@@ -40,16 +40,18 @@ class Game(Layout):
         bit.x = 250
         bit.y = 575
         bit.color = (0, 0, 0, 1)
-        bit.background_normal = "Images/Bita.png"
+        bit.background_normal = "Images/Green.png"
         bit.size = (150, 150)
+        bit.border = (0, 0, 0, 0)
         tk = Button(text='Take', font_size=45)
-        tk.x = 210
-        tk.y = 775
+        tk.x = 250
+        tk.y = 815
         tk.color = (0, 0, 0, 1)
-        tk.background_normal = "Images/Take.png"
-        tk.size = (225, 225)
+        tk.background_normal = "Images/Red.png"
+        tk.size = (150, 150)
         bit.bind(on_press=self.bita)
         tk.bind(on_press=self.take_ply)
+        tk.border = (0, 0, 0, 0)
         self.add_widget(bit)
         self.add_widget(tk)
 
