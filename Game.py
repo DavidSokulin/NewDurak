@@ -411,6 +411,15 @@ class Game(Layout):
             y = self.find_y_by_origin(origin)
             self.update_loc(list, y)
 
+    def popup_invalid(self):
+        print("Not a valid move, please try again")
+        popup = Popup(title='Not a valid move',
+                      content=Label(text='Not a valid move, please try again' + "\n" + "\n" + "\n"
+                                         "   press on the board to dismiss"),
+                      size_hint=(None, None),
+                      size=(600, 600))
+        popup.open()
+
     def find_y_by_origin(self, origin):
         if origin == 1:
             return 50
@@ -440,6 +449,7 @@ class Game(Layout):
         if self.win() == 0:
             if self.turn:  # players turn
                 if not self.legal():
+                    self.popup_invalid()
                     self.revert(self.player, 1)
                     print("Not a valid move please try again")
                 else:
