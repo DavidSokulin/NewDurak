@@ -36,16 +36,18 @@ class Game(Layout):
         self.attacker = True  # | True - player | False - computer |
 
     def create_buttons(self):
-        bit = Button(text='Bita', font_size=50)
+        bit = Button(text='Bita', font_size=45)
         bit.x = 250
         bit.y = 575
-        bit.color = (1, 1, 1, 1)
-        bit.background_color = (0, 0, 0, 0)
-        tk = Button(text='Take', font_size=50)
-        tk.x = 250
+        bit.color = (0, 0, 0, 1)
+        bit.background_normal = "Images/Bita.png"
+        bit.size = (150, 150)
+        tk = Button(text='Take', font_size=45)
+        tk.x = 210
         tk.y = 775
-        tk.color = (1, 1, 1, 1)
-        tk.background_color = (0, 0, 0, 0)
+        tk.color = (0, 0, 0, 1)
+        tk.background_normal = "Images/Take.png"
+        tk.size = (225, 225)
         bit.bind(on_press=self.bita)
         tk.bind(on_press=self.take_ply)
         self.add_widget(bit)
@@ -412,6 +414,7 @@ class Game(Layout):
             self.update_loc(list, y)
 
     def popup_invalid(self):
+
         print("Not a valid move, please try again")
         popup = Popup(title='Not a valid move',
                       content=Label(text='Not a valid move, please try again' + "\n" + "\n" + "\n"
