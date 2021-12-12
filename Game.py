@@ -4,6 +4,9 @@ from kivy.uix.button import Button
 from Card import Card
 from kivy.core.window import Window
 from kivy.app import App
+from kivy.uix.popup import Popup
+from kivy.uix.label import Label
+import time
 
 
 class Game(Layout):
@@ -434,7 +437,7 @@ class Game(Layout):
             self.update_all_loc()
 
     def run(self):  # runs the game
-        if self.win() == 0:  # runs the game until someone wins
+        if self.win() == 0:
             if self.turn:  # players turn
                 if not self.legal():
                     self.revert(self.player, 1)
@@ -462,8 +465,27 @@ class Game(Layout):
                     while not self.legal():
                         self.revert(self.comp, 3)
                         print("Not a valid move please try again")
-                """if not self.attacker and not self.turn:
-                    self.run()"""
+
+        won = self.win()
+        if won == 1:
+            print("Computer is the Durak")
+            popup = Popup(title='Computer is the Durak',
+                          content=Label(text='Game over, Computer is the Durak'),
+                          size_hint=(None, None),
+                          size=(600, 600))
+            popup.open()
+#            time.sleep(15)
+#            exit()
+
+        if won == 2:
+            print("Player is the Durak")
+            popup = Popup(title='Player is the Durak',
+                          content=Label(text='Game over, Player is the Durak'),
+                          size_hint=(None, None),
+                          size=(600, 600))
+            popup.open()
+#            time.sleep(15)
+#            exit()
 
 
 class DurakApp(App):
