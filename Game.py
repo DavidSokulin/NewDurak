@@ -6,6 +6,7 @@ from kivy.core.window import Window
 from kivy.app import App
 from kivy.uix.popup import Popup
 from kivy.uix.label import Label
+from kivy.uix.image import Image
 import time
 
 
@@ -117,6 +118,21 @@ class Game(Layout):
         self.back_card.y = 600
         self.back_card.do_translation = False
         self.add_widget(self.back_card)
+        self.disp_koser()
+
+    def disp_koser(self):
+        if self.koser == 1:
+            koser_icon = Image(source="Images/Heart.png")
+        elif self.koser == 2:
+            koser_icon = Image(source="Images/Spade.png")
+        elif self.koser == 3:
+            koser_icon = Image(source="Images/Club.png")
+        else:
+            koser_icon = Image(source="Images/Diamond.png")
+        koser_icon.x = 2510
+        koser_icon.y = 915
+        koser_icon.opacity = 0.75
+        self.add_widget(koser_icon)
 
     def move(self, cur_play, selected):  # executes the move that was made
         self.board.append(cur_play.pop(selected))
@@ -247,15 +263,25 @@ class Game(Layout):
 
     def update_loc(self, list, cor_y):
         if len(list) > 0:
-            first_c = self.distance_between(len(list))
+            first_c = self.first_card_loc(len(list))
             dist = self.distance(len(list))
             for i in range(len(list)):
                 list[i].y = cor_y
                 list[i].x = first_c + i * dist
 
-    def distance_between(self, length):
+    def update_board_loc(self):
+        length = len(self.board)
         if length > 0:
-            starting_x = 0
+            dist = 250
+            pairs = length / 2
+            if length % 2 != 0:
+                pairs = pairs + 1
+            starting_x = self.first_card_loc(pairs)
+            for i in range(length):
+                self.board[i].x = starting_x + dist * (i/2)
+
+    def first_card_loc(self, length):
+        if length > 0:
             end_x = int(2550)
             mid = int(end_x / 2)
             f_dist = self.distance(length)
@@ -272,7 +298,7 @@ class Game(Layout):
         starting_x = 0
         end_x = int(2550)
         mid = int(end_x / 2)
-        max_dist = int(200)
+        max_dist = int(210)
         dist = int(end_x - starting_x)
         dist = int(dist / length)
         if dist < max_dist:

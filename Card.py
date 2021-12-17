@@ -20,6 +20,7 @@ class Card(Scatter):
         self.cards_in_deck = 1
         self.board_loc = []
         self.player_loc = []
+        self.border = (0, 0, 0, 0)
         self.do_translation = True
         name = self.get_name()  # defines the file name that contains this card
         image = Image(source=name)
