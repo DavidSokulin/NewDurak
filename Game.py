@@ -7,6 +7,7 @@ from kivy.app import App
 from kivy.uix.popup import Popup
 from kivy.uix.label import Label
 from kivy.uix.image import Image
+from kivy.clock import Clock
 import time
 
 
@@ -130,7 +131,8 @@ class Game(Layout):
         else:
             koser_icon = Image(source="Images/Diamond.png")
         koser_icon.x = 2510
-        koser_icon.y = 915
+        #koser_icon.y = 915
+        koser_icon.y = 950
         koser_icon.opacity = 0.75
         self.add_widget(koser_icon)
 
@@ -349,6 +351,8 @@ class Game(Layout):
                 list[-1].do_translation = True
             else:
                 list[-1].hide_cards()
+        if not pl:
+            self.comp_take_popup()
         self.update_index(list)
         self.update_loc(list, 1225)
         self.after_turn()
@@ -444,12 +448,33 @@ class Game(Layout):
     def popup_invalid(self):
 
         print("Not a valid move, please try again")
-        popup = Popup(title='Not a valid move',
-                      content=Label(text='Not a valid move, please try again' + "\n" + "\n" + "\n"
-                                         "   press on the board to dismiss"),
+        popup = Popup(title='                       Not a valid move',
+                      content=Label(text='Not a valid move, please try again'),
                       size_hint=(None, None),
-                      size=(600, 600))
+                      pos_hint={'right': .6, 'bottom': 1},
+                      size=(600, 200))
         popup.open()
+        Clock.schedule_once(popup.dismiss, 1.5)
+
+    def comp_take_popup(self):
+        print("The computer took all the cards from the board")
+        popup = Popup(title='                                  Take',
+                      content=Label(text='   Computer choose to take'),
+                      size_hint=(None, None),
+                      pos_hint={'right': .6, 'bottom': 1},
+                      size=(600, 200))
+        popup.open()
+        Clock.schedule_once(popup.dismiss, 1.5)
+
+    def comp_bita_popup(self):
+        print("Computer choose bita")
+        popup = Popup(title='                                  Bita',
+                      content=Label(text='  Computer choose Bita'),
+                      size_hint=(None, None),
+                      pos_hint={'right': .6, 'bottom': 1},
+                      size=(600, 200))
+        popup.open()
+        Clock.schedule_once(popup.dismiss, 1.5)
 
     def find_y_by_origin(self, origin):
         if origin == 1:
@@ -482,7 +507,6 @@ class Game(Layout):
                 if not self.legal():
                     self.popup_invalid()
                     self.revert(self.player, 1)
-                    print("Not a valid move please try again")
                 else:
                     self.computer()
                     self.update_all_loc()
@@ -490,7 +514,7 @@ class Game(Layout):
             else:  # computers turn
                 if not self.legal():
                     self.revert(self.player, 1)
-                    print("Not a valid move please try again")
+                    self.popup_invalid()
                     return
                 selected = self.find_move()
                 if selected == -1 and self.attacker:  # if the computer does not have an available move
@@ -498,6 +522,7 @@ class Game(Layout):
                     self.update_all_loc()
                 elif selected == -1 and not self.attacker:  # the comp does not have an available move and turn is finished
                     self.bita(1)
+                    self.comp_bita_popup()
                     self.attacker = True
                     self.turn = True
                     self.update_all_loc()
