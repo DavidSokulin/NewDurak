@@ -8,7 +8,6 @@ from kivy.uix.popup import Popup
 from kivy.uix.label import Label
 from kivy.uix.image import Image
 from kivy.clock import Clock
-import time
 
 
 class Game(Layout):
@@ -424,27 +423,30 @@ class Game(Layout):
         return tmp
 
     def legal(self):
-        if len(self.board) == 1:
-            return True
-        elif len(self.board) % 2 == 0 and len(self.board) > 0:
-            if self.board[-1].kind == self.board[-2].kind:
-                if self.board[-1].value > self.board[-2].value:
-                    return True
-                else:
-                    return False
-            else:
-                if self.board[-1].kind == self.koser:
-                    return True
-                else:
-                    return False
-        else:
-            if len(self.board) > 0:
-                for i in range(len(self.board) - 1):
-                    if self.board[-1].value == self.board[i].value:
-                        return True
-                return False
-            else:
+        if len(self.board) <= 12:
+            if len(self.board) == 1:
                 return True
+            elif len(self.board) % 2 == 0 and len(self.board) > 0:
+                if self.board[-1].kind == self.board[-2].kind:
+                    if self.board[-1].value > self.board[-2].value:
+                        return True
+                    else:
+                        return False
+                else:
+                    if self.board[-1].kind == self.koser:
+                        return True
+                    else:
+                        return False
+            else:
+                if len(self.board) > 0:
+                    for i in range(len(self.board) - 1):
+                        if self.board[-1].value == self.board[i].value:
+                            return True
+                    return False
+                else:
+                    return True
+        else:
+            return False
 
     def revert(self, list, origin):
         if len(self.board) > 0:
@@ -539,8 +541,7 @@ class Game(Layout):
                     self.move(self.comp, selected)
                     while not self.legal():
                         self.revert(self.comp, 3)
-                        print("Not a valid move please try again")
-
+                        self.popup_invalid()
         won = self.win()
         if won == 1:
             print("Computer is the Durak")
@@ -549,8 +550,7 @@ class Game(Layout):
                           size_hint=(None, None),
                           size=(600, 600))
             popup.open()
-#            time.sleep(15)
-#            exit()
+            Clock.schedule_once(exit, 10)
 
         if won == 2:
             print("Player is the Durak")
@@ -559,8 +559,7 @@ class Game(Layout):
                           size_hint=(None, None),
                           size=(600, 600))
             popup.open()
-#            time.sleep(15)
-#            exit()
+            Clock.schedule_once(exit, 10)
 
 
 class DurakApp(App):
