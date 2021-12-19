@@ -212,7 +212,7 @@ class Game(Layout):
 
     def update_all_loc(self):
         self.update_loc(self.player, 50)
-        self.update_loc(self.board, 600)
+        self.update_board_loc()
         self.update_loc(self.comp, 1225)
 
     def update_lists(self, org_list, new_list, index):  # updates the lists accordingly
@@ -222,7 +222,7 @@ class Game(Layout):
         if len(org_list) > 0:
             if org_list[0].y == 50:
                 org_origin = 1
-            elif org_list[0].y == 600:
+            elif org_list[0].y == 600 or org_list[0].y == 650 and org_list[0].y == 550:
                 org_origin = 2
             elif org_list[0].y == 1225:
                 org_origin = 3
@@ -234,7 +234,7 @@ class Game(Layout):
         if len(new_list) > 1:
             if new_list[0].y == 50:
                 new_origin = 1
-            elif new_list[0].y == 600:
+            elif new_list[0].y == 600 or new_list[0].y == 650 or new_list[0].y == 550:
                 new_origin = 2
             elif new_list[0].y == 1225:
                 new_origin = 3
@@ -279,7 +279,14 @@ class Game(Layout):
                 pairs = pairs + 1
             starting_x = self.first_card_loc(pairs)
             for i in range(length):
-                self.board[i].x = starting_x + dist * (i/2)
+                if i % 2 == 0:
+                    self.board[i].x = starting_x + dist * int(i/2)
+                    self.board[i].y = 650
+                    self.board[i].origin = 2
+                else:
+                    self.board[i].x = starting_x + dist * int(i/2)
+                    self.board[i].y = 550
+                    self.board[i].origin = 2
 
     def first_card_loc(self, length):
         if length > 0:
@@ -307,20 +314,6 @@ class Game(Layout):
         else:
             f_dist = int(max_dist)
         return f_dist
-
-    def valid_move(self, selected, cur_play):  # checks to see if the move that was made by the player is valid
-        if len(self.board) > 0 and len(cur_play) > 0 and selected >= 0:
-            if cur_play[selected].kind == self.board[-1].kind:  # if the kind of the cards is the same
-                if cur_play[selected].value > self.board[len(self.board)-1].value:  # defending card is higher in value
-                    return True
-                else:
-                    return False
-            elif cur_play[selected].kind == self.koser:  # if the card is a koser then it is better then a non koser
-                return True
-            else:
-                return False
-        else:
-            return True
 
     def win(self):  # check if there is a winner | 0 - no winner | 1 - player won | 2 - computer won |
         if len(self.deck) == 0:
@@ -454,7 +447,7 @@ class Game(Layout):
             list[-1].index = len(list) - 1
             list[-1].origin = origin
             y = self.find_y_by_origin(origin)
-            self.update_loc(list, y)
+            self.update_all_loc()
 
     def popup_invalid(self):
 
