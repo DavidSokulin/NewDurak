@@ -51,7 +51,7 @@ class Game(Layout):
         tk.color = (0, 0, 0, 1)
         tk.background_normal = "Images/Red.png"
         tk.size = (150, 150)
-        bit.bind(on_press=self.bita)
+        bit.bind(on_press=self.bita_ply)
         tk.bind(on_press=self.take_ply)
         tk.border = (0, 0, 0, 0)
         self.add_widget(bit)
@@ -335,12 +335,15 @@ class Game(Layout):
             return 0
 
     def take_ply(self, touch):
-        self.take(self.player, True)
-        self.update_loc(self.player, 50)
-        self.turn = False
-        self.attacker = False
-        self.after_turn()
-        self.run()
+        if not self.attacker:
+            self.take(self.player, True)
+            self.update_loc(self.player, 50)
+            self.turn = False
+            self.attacker = False
+            self.after_turn()
+            self.run()
+        else:
+            self.popup_invalid()
 
     def take(self, list, pl):
         while len(self.board):
@@ -357,7 +360,13 @@ class Game(Layout):
         self.update_loc(list, 1225)
         self.after_turn()
 
-    def bita(self, touch):
+    def bita_ply(self, touch):
+        if self.attacker:
+            self.bita()
+        else:
+            self.popup_invalid()
+
+    def bita(self):
         if len(self.not_in_game) == 0 and len(self.board) > 0:
             self.not_in_game.append(self.board.pop(0))
             self.not_in_game[-1].y = 1100
@@ -491,7 +500,7 @@ class Game(Layout):
             self.update_loc(self.comp, 1225)
 
         elif selected == -1 and not self.attacker:  # the comp does not have an available move and turn is finished
-            self.bita(1)
+            self.bita()
             self.update_loc(self.comp, 1225)
 
         else:
@@ -521,7 +530,7 @@ class Game(Layout):
                     self.take(self.comp, False)
                     self.update_all_loc()
                 elif selected == -1 and not self.attacker:  # the comp does not have an available move and turn is finished
-                    self.bita(1)
+                    self.bita()
                     self.comp_bita_popup()
                     self.attacker = True
                     self.turn = True
