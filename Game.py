@@ -35,6 +35,7 @@ class Game(Layout):
         self.call_count = 0   # number of time the update function has been called in the past turn
         self.turn = True  # | True - player | False - computer |
         self.attacker = True  # | True - player | False - computer |
+        self.adding = False  # allows the player to add cards after the computer has chosen to take the cards
 
     def create_buttons(self):
         bit = Button(text='Bita', font_size=45)
@@ -130,7 +131,7 @@ class Game(Layout):
         else:
             koser_icon = Image(source="Images/Diamond.png")
         koser_icon.x = 2510
-        #koser_icon.y = 915
+        # koser_icon.y = 915
         koser_icon.y = 950
         koser_icon.opacity = 0.75
         self.add_widget(koser_icon)
@@ -214,6 +215,11 @@ class Game(Layout):
         self.update_loc(self.player, 50)
         self.update_board_loc()
         self.update_loc(self.comp, 1225)
+        self.hide_comp()
+
+    def hide_comp(self):
+        for i in range(len(self.comp)):
+            self.comp[i].hide_cards()
 
     def update_lists(self, org_list, new_list, index):  # updates the lists accordingly
         new_list.append(org_list.pop(index))
@@ -226,6 +232,8 @@ class Game(Layout):
                 org_origin = 2
             elif org_list[0].y == 1225:
                 org_origin = 3
+            else:
+                org_origin = 0
         else:
             if new_list[0].origin == 1:
                 org_origin = 2
@@ -238,6 +246,8 @@ class Game(Layout):
                 new_origin = 2
             elif new_list[0].y == 1225:
                 new_origin = 3
+            else:
+                new_origin = 0
         else:
             if org_origin == 1:
                 new_origin = 2
@@ -246,13 +256,15 @@ class Game(Layout):
         self.update_origin(org_list, org_origin)
         self.update_origin(new_list, new_origin)
 
-    def update_origin(self, list, origin):
-        for i in range(len(list)):
-            list[i].origin = origin
+    @staticmethod
+    def update_origin(lis, origin):
+        for i in range(len(lis)):
+            lis[i].origin = origin
 
-    def update_index(self, list):
-        for i in range(len(list)):
-            list[i].index = i
+    @staticmethod
+    def update_index(lis):
+        for i in range(len(lis)):
+            lis[i].index = i
 
     def update(self, org_list, new_list, index, org_y, dest_y):
         if len(org_list) > index:
@@ -262,13 +274,13 @@ class Game(Layout):
             new_list[-1].y = dest_y
             self.update_loc(new_list, dest_y)
 
-    def update_loc(self, list, cor_y):
-        if len(list) > 0:
-            first_c = self.first_card_loc(len(list))
-            dist = self.distance(len(list))
-            for i in range(len(list)):
-                list[i].y = cor_y
-                list[i].x = first_c + i * dist
+    def update_loc(self, lis, cor_y):
+        if len(lis) > 0:
+            first_c = self.first_card_loc(len(lis))
+            dist = self.distance(len(lis))
+            for i in range(len(lis)):
+                lis[i].y = cor_y
+                lis[i].x = first_c + i * dist
 
     def update_board_loc(self):
         length = len(self.board)
@@ -302,10 +314,10 @@ class Game(Layout):
             first_c = mid
         return first_c
 
-    def distance(self, length):
+    @staticmethod
+    def distance(length):
         starting_x = 0
         end_x = int(2550)
-        mid = int(end_x / 2)
         max_dist = int(210)
         dist = int(end_x - starting_x)
         dist = int(dist / length)
@@ -337,23 +349,38 @@ class Game(Layout):
         else:
             self.popup_invalid()
 
-    def take(self, list, pl):
+    def take(self, lis, pl):
+        if pl:  # allows the computer to add cards after the player has choosen to take
+            selected = self.find_move()
+            while selected != -1:
+                self.move(self.comp, selected)
+                self.update_all_loc()
+                selected = self.find_move()
+        elif self.adding:
+            self.adding = False
+        else:
+            self.comp_take_popup()
+            self.adding = True
+            return
+
         while len(self.board):
-            list.append(self.board.pop(0))
-            list[-1].origin = 1
-            list[-1].y = 1225
+            lis.append(self.board.pop(0))
+            lis[-1].origin = 1
+            lis[-1].y = 1225
             if pl:
-                list[-1].do_translation = True
+                lis[-1].do_translation = True
             else:
-                list[-1].hide_cards()
+                lis[-1].hide_cards()
         if not pl:
             self.comp_take_popup()
-        self.update_index(list)
-        self.update_loc(list, 1225)
+        self.update_index(lis)
+        self.update_loc(lis, 1225)
         self.after_turn()
 
     def bita_ply(self, touch):
-        if self.attacker:
+        if self.attacker and self.adding:
+            self.take(self.comp, False)
+        elif self.attacker and not self.adding:
             self.bita()
         else:
             self.popup_invalid()
@@ -416,7 +443,7 @@ class Game(Layout):
         return tmp
 
     def legal(self):
-        if len(self.board) <= 12:
+        if len(self.board) <= 12 and not self.adding:
             if len(self.board) == 1:
                 return True
             elif len(self.board) % 2 == 0 and len(self.board) > 0:
@@ -438,18 +465,24 @@ class Game(Layout):
                     return False
                 else:
                     return True
+        elif self.adding:
+            if len(self.board) > 0:
+                for i in range(len(self.board) - 1):
+                    if self.board[-1].value == self.board[i].value:
+                        return True
+                return False
         else:
             return False
 
-    def revert(self, list, origin):
+    def revert(self, lis, origin):
         if len(self.board) > 0:
-            list.append(self.board.pop(-1))
-            list[-1].index = len(list) - 1
-            list[-1].origin = origin
-            y = self.find_y_by_origin(origin)
+            lis.append(self.board.pop(-1))
+            lis[-1].index = len(lis) - 1
+            lis[-1].origin = origin
             self.update_all_loc()
 
-    def popup_invalid(self):
+    @staticmethod
+    def popup_invalid():
 
         print("Not a valid move, please try again")
         popup = Popup(title='                       Not a valid move',
@@ -460,7 +493,8 @@ class Game(Layout):
         popup.open()
         Clock.schedule_once(popup.dismiss, 1.5)
 
-    def comp_take_popup(self):
+    @staticmethod
+    def comp_take_popup():
         print("The computer took all the cards from the board")
         popup = Popup(title='                                  Take',
                       content=Label(text='   Computer choose to take'),
@@ -470,7 +504,8 @@ class Game(Layout):
         popup.open()
         Clock.schedule_once(popup.dismiss, 1.5)
 
-    def comp_bita_popup(self):
+    @staticmethod
+    def comp_bita_popup():
         print("Computer choose bita")
         popup = Popup(title='                                  Bita',
                       content=Label(text='  Computer choose Bita'),
@@ -480,7 +515,8 @@ class Game(Layout):
         popup.open()
         Clock.schedule_once(popup.dismiss, 1.5)
 
-    def find_y_by_origin(self, origin):
+    @staticmethod
+    def find_y_by_origin(origin):
         if origin == 1:
             return 50
         elif origin == 2:
@@ -515,7 +551,7 @@ class Game(Layout):
                     self.computer()
                     self.update_all_loc()
 
-            else:  # computers turn
+            elif not self.adding:  # computers turn
                 if not self.legal():
                     self.revert(self.player, 1)
                     self.popup_invalid()
@@ -524,7 +560,7 @@ class Game(Layout):
                 if selected == -1 and self.attacker:  # if the computer does not have an available move
                     self.take(self.comp, False)
                     self.update_all_loc()
-                elif selected == -1 and not self.attacker:  # the comp does not have an available move and turn is finished
+                elif selected == -1 and not self.attacker:  # the comp does not have an available move and turn is over
                     self.bita()
                     self.comp_bita_popup()
                     self.attacker = True
@@ -543,7 +579,7 @@ class Game(Layout):
                           size_hint=(None, None),
                           size=(600, 600))
             popup.open()
-            Clock.schedule_once(exit, 10)
+            Clock.schedule_once(exit, 7.5)
 
         if won == 2:
             print("Player is the Durak")
@@ -552,7 +588,7 @@ class Game(Layout):
                           size_hint=(None, None),
                           size=(600, 600))
             popup.open()
-            Clock.schedule_once(exit, 10)
+            Clock.schedule_once(exit, 7.5)
 
 
 class DurakApp(App):
