@@ -359,7 +359,7 @@ class Game(Layout):
         elif self.adding:
             self.adding = False
         else:
-            self.comp_take_popup()
+            self.instructions_popup()
             self.adding = True
             return
 
@@ -516,6 +516,39 @@ class Game(Layout):
         Clock.schedule_once(popup.dismiss, 1.5)
 
     @staticmethod
+    def instructions_popup():
+        print("Add cards as you like and press Bita when you are done ")
+        popup = Popup(title='                                                Add cards',
+                      content=Label(text='Add cards as you like and press Bita when you are done '),
+                      size_hint=(None, None),
+                      pos_hint={'right': .65, 'bottom': 0.5},
+                      size=(900, 200))
+        popup.open()
+        Clock.schedule_once(popup.dismiss, 3.5)
+
+    @staticmethod
+    def comp_win():
+        print("Computer is the Durak")
+        popup = Popup(title='Computer is the Durak',
+                      content=Label(text='Game over, Computer is the Durak'),
+                      size_hint=(None, None),
+                      pos_hint={'right': .6, 'bottom': 1},
+                      size=(600, 200))
+        popup.open()
+        Clock.schedule_once(exit, 7.5)
+
+    @staticmethod
+    def player_win():
+        print("Player is the Durak")
+        popup = Popup(title='Player is the Durak',
+                      content=Label(text='Game over, Player is the Durak'),
+                      size_hint=(None, None),
+                      pos_hint={'right': .6, 'bottom': 1},
+                      size=(600, 200))
+        popup.open()
+        Clock.schedule_once(exit, 7.5)
+
+    @staticmethod
     def find_y_by_origin(origin):
         if origin == 1:
             return 50
@@ -573,22 +606,9 @@ class Game(Layout):
                         self.popup_invalid()
         won = self.win()
         if won == 1:
-            print("Computer is the Durak")
-            popup = Popup(title='Computer is the Durak',
-                          content=Label(text='Game over, Computer is the Durak'),
-                          size_hint=(None, None),
-                          size=(600, 600))
-            popup.open()
-            Clock.schedule_once(exit, 7.5)
-
+            self.comp_win()
         if won == 2:
-            print("Player is the Durak")
-            popup = Popup(title='Player is the Durak',
-                          content=Label(text='Game over, Player is the Durak'),
-                          size_hint=(None, None),
-                          size=(600, 600))
-            popup.open()
-            Clock.schedule_once(exit, 7.5)
+            self.player_win()
 
 
 class DurakApp(App):
