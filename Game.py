@@ -383,10 +383,13 @@ class Game(Layout):
         self.max_attack = len(self.comp)
         if len(self.player) < self.max_attack:
             self.max_attack = len(self.player)
+        if self.max_attack > 6:
+            self.max_attack = 6
 
     def bita_ply(self, touch):
         if self.attacker and self.adding:
             self.take(self.comp, False, True)
+            self.added = 0
         elif self.attacker and not self.adding:
             self.bita()
         else:
@@ -418,6 +421,8 @@ class Game(Layout):
         self.max_attack = len(self.comp)
         if len(self.player) < self.max_attack:
             self.max_attack = len(self.player)
+        if self.max_attack > 6:
+            self.max_attack = 6
 
         if not self.attacker and not self.turn:
             self.run()
@@ -483,10 +488,14 @@ class Game(Layout):
                     return True
         elif self.adding:
             if len(self.board) > 0:
-                for i in range(len(self.board) - 1):
-                    if self.board[-1].value == self.board[i].value:
-                        return True
+                if int((len(self.board) - self.added) / 2) + self.added + 1 <= self.max_attack:
+                    for i in range(len(self.board) - 1):
+                        if self.board[-1].value == self.board[i].value:
+                            return True
+                else:
+                    print("!")
                 return False
+
         else:
             return False
 
@@ -496,6 +505,8 @@ class Game(Layout):
             lis[-1].index = len(lis) - 1
             lis[-1].origin = origin
             self.update_all_loc()
+            if self.adding:
+                self.added = self.added - 1
 
     @staticmethod
     def popup_invalid():
@@ -592,6 +603,8 @@ class Game(Layout):
 
     def run(self):  # runs the game
         if self.win() == 0:
+            if self.adding:
+                self.added = self.added + 1
             if self.turn:  # players turn
                 if not self.legal():
                     self.popup_invalid()
