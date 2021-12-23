@@ -38,6 +38,7 @@ class Game(Layout):
         self.adding = False  # allows the player to add cards after the computer has chosen to take the cards
         self.max_attack = 6
         self.added = 0
+        self.game_starter()
 
     def create_buttons(self):
         bit = Button(text='Bita', font_size=45)
@@ -137,6 +138,29 @@ class Game(Layout):
         koser_icon.y = 950
         koser_icon.opacity = 0.75
         self.add_widget(koser_icon)
+
+    def game_starter(self):
+        if not self.first_attacker():
+            self.popup_comp_first()
+            self.turn = False
+            self.attacker = False
+            self.run()
+        else:
+            self.popup_player_first()
+
+    def first_attacker(self):
+        lowest = 15
+        tr_pl = True
+        for i in range(6):
+            if self.player[i].kind == self.koser:
+                if self.player[i].value < lowest:
+                    lowest = self.player[i].value
+                    tr_pl = True
+            if self.comp[i].kind == self.koser:
+                if self.comp[i].value < lowest:
+                    lowest = self.comp[i].value
+                    tr_pl = False
+        return tr_pl
 
     def move(self, cur_play, selected):  # executes the move that was made
         self.board.append(cur_play.pop(selected))
@@ -525,6 +549,28 @@ class Game(Layout):
         Clock.schedule_once(popup.dismiss, 1.5)
 
     @staticmethod
+    def popup_comp_first():
+        print("The computer is making the first move")
+        popup = Popup(title='                          The computer goes first',
+                      content=Label(text='    He has the lowest Koser'),
+                      size_hint=(None, None),
+                      pos_hint={'right': .6, 'bottom': 1},
+                      size=(600, 200))
+        popup.open()
+        Clock.schedule_once(popup.dismiss, 5)
+
+    @staticmethod
+    def popup_player_first():
+        print("The computer is making the first move")
+        popup = Popup(title='                           You go first',
+                      content=Label(text='   You have the lowest Koser'),
+                      size_hint=(None, None),
+                      pos_hint={'right': .6, 'bottom': 1},
+                      size=(600, 200))
+        Clock.schedule_once(popup.open, 2)
+        Clock.schedule_once(popup.dismiss, 5)
+
+    @staticmethod
     def comp_take_popup():
         print("The computer took all the cards from the board")
         popup = Popup(title='                                  Take',
@@ -532,8 +578,8 @@ class Game(Layout):
                       size_hint=(None, None),
                       pos_hint={'right': .6, 'bottom': 1},
                       size=(600, 200))
-        popup.open()
-        Clock.schedule_once(popup.dismiss, 1.5)
+        Clock.schedule_once(popup.open, 5)
+        Clock.schedule_once(popup.dismiss, 4)
 
     @staticmethod
     def comp_bita_popup():
@@ -555,13 +601,13 @@ class Game(Layout):
                       pos_hint={'right': .65, 'bottom': 0.5},
                       size=(900, 200))
         popup.open()
-        Clock.schedule_once(popup.dismiss, 3.5)
+        Clock.schedule_once(popup.dismiss, 4.5)
 
     @staticmethod
     def comp_durak():
         print("Computer is the Durak")
-        popup = Popup(title='               Computer is the Durak',
-                      content=Label(text='Game over, Computer is the Durak'),
+        popup = Popup(title='                             Game over',
+                      content=Label(text='   Computer is the Durak'),
                       size_hint=(None, None),
                       pos_hint={'right': .6, 'bottom': 1},
                       size=(600, 200))
@@ -571,8 +617,8 @@ class Game(Layout):
     @staticmethod
     def player_durak():
         print("Player is the Durak")
-        popup = Popup(title='               Player is the Durak',
-                      content=Label(text='Game over, Player is the Durak'),
+        popup = Popup(title='                             Game over',
+                      content=Label(text='   Player is the Durak'),
                       size_hint=(None, None),
                       pos_hint={'right': .6, 'bottom': 1},
                       size=(600, 200))
