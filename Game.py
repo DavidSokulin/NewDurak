@@ -36,6 +36,8 @@ class Game(Layout):
         self.turn = True  # | True - player | False - computer |
         self.attacker = True  # | True - player | False - computer |
         self.adding = False  # allows the player to add cards after the computer has chosen to take the cards
+        self.max_attack = 6
+        self.added = 0
 
     def create_buttons(self):
         bit = Button(text='Bita', font_size=45)
@@ -340,7 +342,7 @@ class Game(Layout):
 
     def take_ply(self, touch):
         if not self.attacker:
-            self.take(self.player, True)
+            self.take(self.player, True, False)
             self.update_loc(self.player, 50)
             self.turn = False
             self.attacker = False
@@ -349,19 +351,19 @@ class Game(Layout):
         else:
             self.popup_invalid()
 
-    def take(self, lis, pl):
+    def take(self, lis, pl, bit):
         if pl:  # allows the computer to add cards after the player has choosen to take
             selected = self.find_move()
             while selected != -1:
                 self.move(self.comp, selected)
                 self.update_all_loc()
                 selected = self.find_move()
-        elif self.adding:
-            self.adding = False
-        else:
+        elif not bit:
             self.instructions_popup()
             self.adding = True
             return
+        elif bit:
+            self.adding = False
 
         while len(self.board):
             lis.append(self.board.pop(0))
@@ -373,13 +375,18 @@ class Game(Layout):
                 lis[-1].hide_cards()
         if not pl:
             self.comp_take_popup()
+
         self.update_index(lis)
         self.update_loc(lis, 1225)
         self.after_turn()
 
+        self.max_attack = len(self.comp)
+        if len(self.player) < self.max_attack:
+            self.max_attack = len(self.player)
+
     def bita_ply(self, touch):
         if self.attacker and self.adding:
-            self.take(self.comp, False)
+            self.take(self.comp, False, True)
         elif self.attacker and not self.adding:
             self.bita()
         else:
@@ -408,6 +415,10 @@ class Game(Layout):
 
         self.after_turn()
 
+        self.max_attack = len(self.comp)
+        if len(self.player) < self.max_attack:
+            self.max_attack = len(self.player)
+
         if not self.attacker and not self.turn:
             self.run()
 
@@ -430,6 +441,11 @@ class Game(Layout):
             if len(self.board) == 0:
                 for i in range(len(self.comp)):
                     if not self.comp[i].kind == self.koser:
+                        if self.comp[i].value < min_card:
+                            min_card = self.comp[i].value
+                            tmp = i
+                if tmp == -1:
+                    for i in range(len(self.comp)):
                         if self.comp[i].value < min_card:
                             min_card = self.comp[i].value
                             tmp = i
@@ -527,9 +543,9 @@ class Game(Layout):
         Clock.schedule_once(popup.dismiss, 3.5)
 
     @staticmethod
-    def comp_win():
+    def comp_durak():
         print("Computer is the Durak")
-        popup = Popup(title='Computer is the Durak',
+        popup = Popup(title='               Computer is the Durak',
                       content=Label(text='Game over, Computer is the Durak'),
                       size_hint=(None, None),
                       pos_hint={'right': .6, 'bottom': 1},
@@ -538,9 +554,9 @@ class Game(Layout):
         Clock.schedule_once(exit, 7.5)
 
     @staticmethod
-    def player_win():
+    def player_durak():
         print("Player is the Durak")
-        popup = Popup(title='Player is the Durak',
+        popup = Popup(title='               Player is the Durak',
                       content=Label(text='Game over, Player is the Durak'),
                       size_hint=(None, None),
                       pos_hint={'right': .6, 'bottom': 1},
@@ -560,7 +576,7 @@ class Game(Layout):
     def computer(self):
         selected = self.find_move()
         if selected == -1 and self.attacker:  # if the computer does not have an available move
-            self.take(self.comp, False)
+            self.take(self.comp, False, False)
             self.update_loc(self.comp, 1225)
 
         elif selected == -1 and not self.attacker:  # the comp does not have an available move and turn is finished
@@ -591,7 +607,7 @@ class Game(Layout):
                     return
                 selected = self.find_move()
                 if selected == -1 and self.attacker:  # if the computer does not have an available move
-                    self.take(self.comp, False)
+                    self.take(self.comp, False, False)
                     self.update_all_loc()
                 elif selected == -1 and not self.attacker:  # the comp does not have an available move and turn is over
                     self.bita()
@@ -606,9 +622,9 @@ class Game(Layout):
                         self.popup_invalid()
         won = self.win()
         if won == 1:
-            self.comp_win()
+            self.comp_durak()
         if won == 2:
-            self.player_win()
+            self.player_durak()
 
 
 class DurakApp(App):
