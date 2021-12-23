@@ -283,6 +283,8 @@ class Game(Layout):
             for i in range(len(lis)):
                 lis[i].y = cor_y
                 lis[i].x = first_c + i * dist
+                self.remove_widget(lis[i])
+                self.add_widget(lis[i])
 
     def update_board_loc(self):
         length = len(self.board)
@@ -301,6 +303,8 @@ class Game(Layout):
                     self.board[i].x = starting_x + dist * int(i/2)
                     self.board[i].y = 550
                     self.board[i].origin = 2
+                    self.remove_widget(self.board[i])
+                    self.add_widget(self.board[i])
 
     def first_card_loc(self, length):
         if length > 0:
