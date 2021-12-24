@@ -251,10 +251,17 @@ class Game(Layout):
 
     def update_all_loc(self):
         # updates all the cards location on the board
+        self.sort()
+        self.hide_comp()
         self.update_loc(self.player, 50)
         self.update_board_loc()
         self.update_loc(self.comp, 1225)
-        self.hide_comp()
+
+    def sort(self):
+        self.player.sort(key=lambda x: x.value)
+        self.comp.sort(key=lambda x: x.value)
+        self.update_index(self.player)
+        self.update_index(self.comp)
 
     def hide_comp(self):  # hides all the computers cards so that the player doesn't see them
         for i in range(len(self.comp)):
@@ -577,7 +584,7 @@ class Game(Layout):
                       size_hint=(None, None),
                       pos_hint={'right': .6, 'bottom': 1},
                       size=(600, 200))
-        Clock.schedule_once(popup.open, 5)
+        popup.open()
         Clock.schedule_once(popup.dismiss, 4)
 
     @staticmethod
