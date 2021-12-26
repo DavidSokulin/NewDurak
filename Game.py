@@ -367,14 +367,22 @@ class Game(Layout):
         return f_dist
 
     def win(self):  # check if there is a winner | 0 - no winner | 1 - player won | 2 - computer won |
-        if len(self.deck) == 0:
-            if len(self.player) == 0:
-                return 1
-            elif len(self.comp) == 0:
-                return 2
+        if self.legal():
+            if len(self.deck) == 0:
+                if len(self.player) == 0:
+                    return 1
+                elif len(self.comp) == 0:
+                    return 2
+                else:
+                    return 0
             else:
                 return 0
         else:
+            if self.turn:
+                self.revert(self.player, 1)
+            else:
+                self.revert(self.comp, 3)
+            self.popup_invalid()
             return 0
 
     def take_ply(self, touch):  # tied to the take button so only the player can call this function
@@ -527,7 +535,11 @@ class Game(Layout):
                         if self.board[-1].value == self.board[i].value:
                             return True
                 return False
+            else:
+                return True
 
+        elif len(self.board) == 0 or len(self.board) == 1:
+            return True
         else:
             return False
 
