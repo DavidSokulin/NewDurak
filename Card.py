@@ -55,8 +55,8 @@ class Card(Scatter):
 
     def on_touch_up(self, touch):  # magnetizes cards to a specific location
         if self.kind != 0:
-            if self.y > 300 and self.y != 600 and self.y != 1225 and self.origin == 1:
-                self.parent.update(self.parent.player, self.parent.board, self.index, 50, 600)
+            if self.y > 300 and self.y != 1225 and self.origin == 1:
+                self.parent.update(self.parent.player, self.parent.board, self.index, 50)
                 self.parent.run()
             elif self.y < 300 and self.origin == 1:
                 self.parent.update_loc(self.parent.player, 50)

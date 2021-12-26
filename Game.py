@@ -26,10 +26,9 @@ class Game(Layout):
         self.back_card = Card(0, 0)
         self.distribute_cards()
         self.set_koser()
-        self.update_loc(self.player, 50)
-        self.update_loc(self.comp, 1225)
         self.board = []  # list of cards that represents the cards on the board
         self.not_in_game = []  # cards that arent in the game
+        self.update_all_loc()
         self.create_buttons()
         self.upd = False  # has already been updated
         self.call_count = 0   # number of time the update function has been called in the past turn
@@ -301,7 +300,8 @@ class Game(Layout):
         for i in range(len(lis)):
             lis[i].index = i
 
-    def update(self, org_list, new_list, index, org_y, dest_y):  # updates everything that needs to be updated
+    def update(self, org_list, new_list, index, org_y):  # updates everything that needs to be updated
+        dest_y = self.find_y_by_origin(2, len(self.board)+1)
         if len(org_list) > index:
             self.update_lists(org_list, new_list, index)
             if len(org_list):
@@ -409,8 +409,6 @@ class Game(Layout):
             else:
                 lis[-1].origin = 3
                 lis[-1].hide_cards()
-        if not pl:
-            self.comp_take_popup()
 
         self.update_index(lis)
         self.after_turn()
@@ -601,7 +599,7 @@ class Game(Layout):
     @staticmethod
     def instructions_popup():
         print("Add cards as you like and press Bita when you are done ")
-        popup = Popup(title='                                                Add cards',
+        popup = Popup(title='                                       Computer chose to take',
                       content=Label(text='Add cards as you like and press Bita when you are done '),
                       size_hint=(None, None),
                       pos_hint={'right': .65, 'bottom': 0.5},
@@ -632,11 +630,14 @@ class Game(Layout):
         Clock.schedule_once(exit, 7.5)
 
     @staticmethod
-    def find_y_by_origin(origin):  # finds y coordinate from origin
+    def find_y_by_origin(origin, index):  # finds y coordinate from origin
         if origin == 1:
             return 50
         elif origin == 2:
-            return 600
+            if index % 2 == 0:
+                return 650
+            else:
+                return 550
         elif origin == 3:
             return 1225
 
@@ -672,7 +673,7 @@ class Game(Layout):
                 if not self.legal():
                     self.popup_invalid()
                     self.revert(self.player, 1)
-                else:
+                elif not self.adding:  # computer defending
                     self.computer()
                     self.update_all_loc()
 
