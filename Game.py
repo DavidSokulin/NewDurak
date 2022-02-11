@@ -42,13 +42,13 @@ class Game(Layout):
     def create_buttons(self):
         # Creates two buttons - Bita and take, they are displayed on the left side of the screen
         bit = Button(text='Bita', font_size=45)
-        bit.x = 250
-        bit.y = 575
-        bit.color = (0, 0, 0, 1)
+        bit.x = 250  # x coordinate of the button
+        bit.y = 575  # y coordinate of the button
+        bit.color = (0, 0, 0, 1)  # color of the button
         bit.background_normal = "Images/Green.png"  # Green Bita button
-        bit.size = (150, 150)
+        bit.size = (150, 150)  # size of the button
         bit.border = (0, 0, 0, 0)  # Fix for bug in kivy that distorts the image if border isn't set this way
-        tk = Button(text='Take', font_size=45)
+        tk = Button(text='Take', font_size=45)  # Take button
         tk.x = 250
         tk.y = 815
         tk.color = (0, 0, 0, 1)
@@ -367,22 +367,14 @@ class Game(Layout):
         return f_dist
 
     def win(self):  # check if there is a winner | 0 - no winner | 1 - player won | 2 - computer won |
-        if self.legal():
-            if len(self.deck) == 0:
-                if len(self.player) == 0:
-                    return 1
-                elif len(self.comp) == 0:
-                    return 2
-                else:
-                    return 0
+        if len(self.deck) == 0:
+            if len(self.player) == 0:
+                return 1
+            elif len(self.comp) == 0:
+                return 2
             else:
                 return 0
         else:
-            if self.turn:
-                self.revert(self.player, 1)
-            else:
-                self.revert(self.comp, 3)
-            self.popup_invalid()
             return 0
 
     def take_ply(self, touch):  # tied to the take button so only the player can call this function
@@ -506,6 +498,9 @@ class Game(Layout):
 
     def legal(self):
         # checks to see if the move that was made is legal by the game rules
+        if len(self.board) == 0:
+            return True
+
         if len(self.board) <= 12 and not self.adding:
             if len(self.board) == 1:
                 return True
@@ -537,9 +532,6 @@ class Game(Layout):
                 return False
             else:
                 return True
-
-        elif len(self.board) == 0 or len(self.board) == 1:
-            return True
         else:
             return False
 
@@ -678,42 +670,64 @@ class Game(Layout):
             self.move(self.comp, selected)
 
     def run(self):  # runs the game
-        if self.win() == 0:
-            if self.adding:
-                self.added = self.added + 1
-            if self.turn:  # players turn
-                if not self.legal():
-                    self.popup_invalid()
-                    self.revert(self.player, 1)
-                elif not self.adding:  # computer defending
+
+        if self.adding:
+            self.added = self.added + 1
+        if self.turn:  # players turn
+            won = self.win()
+            if not self.legal():
+                self.popup_invalid()
+                self.revert(self.player, 1)
+
+            elif won == 0:
+                if not self.adding:  # computer defending
                     self.computer()
                     self.update_all_loc()
+                    won = self.win()
+                    if won == 1:
+                        self.comp_durak()
+                    elif won == 2:
+                        self.player_durak()
+            elif won == 1:
+                self.comp_durak()
+            elif won == 2:
+                self.player_durak()
 
-            elif not self.adding:  # computers turn
-                if not self.legal():
-                    self.revert(self.player, 1)
+        elif not self.adding:  # computers turn
+            if not self.legal():
+                self.revert(self.player, 1)
+                self.popup_invalid()
+                return
+            selected = self.find_move()
+            if selected == -1 and self.attacker:  # if the computer does not have an available move
+                self.take(self.comp, False, False)
+                self.update_all_loc()
+                won = self.win()
+                if won == 1:
+                    self.comp_durak()
+                elif won == 2:
+                    self.player_durak()
+            elif selected == -1 and not self.attacker:  # the comp does not have an available move and turn is over
+                won = self.win()
+                if won == 1:
+                    self.comp_durak()
+                elif won == 2:
+                    self.player_durak()
+                self.bita()
+                self.comp_bita_popup()
+                self.attacker = True
+                self.turn = True
+                self.update_all_loc()
+            else:
+                self.move(self.comp, selected)
+                while not self.legal():
+                    self.revert(self.comp, 3)
                     self.popup_invalid()
-                    return
-                selected = self.find_move()
-                if selected == -1 and self.attacker:  # if the computer does not have an available move
-                    self.take(self.comp, False, False)
-                    self.update_all_loc()
-                elif selected == -1 and not self.attacker:  # the comp does not have an available move and turn is over
-                    self.bita()
-                    self.comp_bita_popup()
-                    self.attacker = True
-                    self.turn = True
-                    self.update_all_loc()
-                else:
-                    self.move(self.comp, selected)
-                    while not self.legal():
-                        self.revert(self.comp, 3)
-                        self.popup_invalid()
-        won = self.win()
-        if won == 1:  # computer is the Durak
-            self.comp_durak()
-        if won == 2:  # player is the Durak
-            self.player_durak()
+                won = self.win()  #
+                if won == 1:  # if the computer lost
+                    self.comp_durak()
+                elif won == 2:  # if the player lost
+                    self.player_durak()
 
 
 class DurakApp(App):
