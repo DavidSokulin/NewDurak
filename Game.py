@@ -2,6 +2,8 @@ import random
 from kivy.uix.layout import Layout
 from kivy.uix.button import Button
 from Card import Card
+from EarlyGame import EarlyGame
+from State import State
 from kivy.core.window import Window
 from kivy.app import App
 from kivy.uix.popup import Popup
@@ -176,8 +178,10 @@ class Game(Layout):
         self.board[-1].unhide_cards()  # makes the card visible to the player
         self.update_all_loc()
 
-    def after_turn(self):  # distributes cards after the turn so that everyone has at least 6 cards or deck is empty
-        if not self.turn:  # If the player should receive the cards first
+    def after_turn(self):  # Distribute cards after the turn so that everyone has at least 6 cards or deck is empty
+        if len(self.deck) < 5:
+            print()
+        if not self.attacker:  # If the player should receive the cards first
             self.player_after_turn()
         else:
             self.comp_after_turn()
@@ -461,7 +465,18 @@ class Game(Layout):
             self.attacker = True
 
     def find_move(self):  # returns the index of the card that the computer plays or -1 if there is no option to play
-        min_card = 15
+        current_state = State(self.board, self.player, self.comp, self.not_in_game, self.deck,
+                              self.turn, self.attacker, self.koser, self.bottom_card)
+        best_move = EarlyGame(current_state)
+        index = -1
+        if best_move.best_move[0] == -1:
+            self.bita()
+        elif best_move.best_move[0] == -2:
+            self.take(self.comp, False, True)
+        else:
+            index = best_move.best_move[1]
+        return index
+        """min_card = 15
         tmp = -1
         if self.attacker:
             for i in range(len(self.comp)):
@@ -494,7 +509,7 @@ class Game(Layout):
                             if self.comp[i].value < min_card:
                                 min_card = self.comp[i].value
                                 tmp = i
-        return tmp
+        return tmp"""
 
     def legal(self):
         # checks to see if the move that was made is legal by the game rules
