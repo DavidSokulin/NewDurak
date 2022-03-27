@@ -3,6 +3,7 @@ from kivy.uix.layout import Layout
 from kivy.uix.button import Button
 from Card import Card
 from EarlyGame import EarlyGame
+from MinMax import AI
 from State import State
 from kivy.core.window import Window
 from kivy.app import App
@@ -32,6 +33,7 @@ class Game(Layout):
         self.not_in_game = []  # cards that arent in the game
         self.update_all_loc()
         self.create_buttons()
+        self.create_instructions_button()
         self.upd = False  # has already been updated
         self.call_count = 0   # number of time the update function has been called in the past turn
         self.turn = True  # | True - player | False - computer |
@@ -61,6 +63,18 @@ class Game(Layout):
         tk.border = (0, 0, 0, 0)  # Fix for bug in kivy that distorts the image if border isn't set this way
         self.add_widget(bit)
         self.add_widget(tk)
+
+    def create_instructions_button(self):
+        # Creates two buttons - Bita and take, they are displayed on the left side of the screen
+        inst = Button(text='Instructions', font_size=20)
+        inst.x = 2490  # x coordinate of the button
+        inst.y = 1300  # y coordinate of the button
+        inst.color = (0, 0, 0, 1)  # color of the button
+        inst.background_normal = "Images/Red.png"  # Green Bita button
+        inst.size = (150, 150)  # size of the button
+        inst.border = (0, 0, 0, 0)  # Fix for bug in kivy that distorts the image if border isn't set this way
+        inst.bind(on_press=self.popup_start)
+        self.add_widget(inst)
 
     def create_cards(self):  # creates 36 cards (all the cards that will be used in the game)
         for i in range(1, 4+1):  # goes throw each kind of cards that there is from 1 to 4
@@ -179,8 +193,6 @@ class Game(Layout):
         self.update_all_loc()
 
     def after_turn(self):  # Distribute cards after the turn so that everyone has at least 6 cards or deck is empty
-        if len(self.deck) < 5:
-            print()
         if not self.attacker:  # If the player should receive the cards first
             self.player_after_turn()
         else:
@@ -189,7 +201,7 @@ class Game(Layout):
         self.max_attack_update()
         self.update_all_loc()
 
-    def comp_after_turn(self):
+    def comp_after_turn(self):  # Distribute cards after the turn so that everyone has at least 6 cards or deck is empty
         while len(self.comp) < 6 and len(self.deck) > 1:  # computer first card fill up
             self.comp.append(self.deck.pop(0))
             self.comp[-1].y = 1225
@@ -221,7 +233,7 @@ class Game(Layout):
             self.player[-1].rotation = 0
             self.remove_widget(self.back_card)
 
-    def player_after_turn(self):
+    def player_after_turn(self):  # Distribute cards after the turn so that everyone has at least 6 cards or deck is empty
         while len(self.player) < 6 and len(self.deck) > 1:  # player first card fill up
             self.player.append(self.deck.pop(0))
             self.player[-1].y = 50
@@ -260,7 +272,7 @@ class Game(Layout):
         self.update_board_loc()
         self.update_loc(self.comp, 1225)
 
-    def sort(self):
+    def sort(self):  # sorts the cards so that they appear in ascending order
         self.player.sort(key=lambda x: x.value)
         self.comp.sort(key=lambda x: x.value)
         self.update_index(self.player)
@@ -453,7 +465,7 @@ class Game(Layout):
         if not self.attacker and not self.turn:
             self.run()
 
-    def change_turn(self): # changes the turn
+    def change_turn(self):  # changes the turn
         if self.turn:
             self.turn = False
         else:
@@ -467,49 +479,26 @@ class Game(Layout):
     def find_move(self):  # returns the index of the card that the computer plays or -1 if there is no option to play
         current_state = State(self.board, self.player, self.comp, self.not_in_game, self.deck,
                               self.turn, self.attacker, self.koser, self.bottom_card)
-        best_move = EarlyGame(current_state)
-        index = -1
-        if best_move.best_move[0] == -1:
-            self.bita()
-        elif best_move.best_move[0] == -2:
-            self.take(self.comp, False, True)
-        else:
-            index = best_move.best_move[1]
-        return index
-        """min_card = 15
-        tmp = -1
-        if self.attacker:
-            for i in range(len(self.comp)):
-                if self.comp[i].kind == self.board[-1].kind:
-                    if self.comp[i].value > self.board[-1].value:
-                        if self.comp[i].value < min_card:
-                            min_card = self.comp[i].value
-                            tmp = i
-            if min_card == 15 and not self.board[-1].kind == self.koser:
-                for i in range(len(self.comp)):
-                    if self.comp[i].kind == self.koser and self.comp[i].value < min_card:
-                        min_card = self.comp[i].value
-                        tmp = i
-        else:
-            if len(self.board) == 0:
-                for i in range(len(self.comp)):
-                    if not self.comp[i].kind == self.koser:
-                        if self.comp[i].value < min_card:
-                            min_card = self.comp[i].value
-                            tmp = i
-                if tmp == -1:
-                    for i in range(len(self.comp)):
-                        if self.comp[i].value < min_card:
-                            min_card = self.comp[i].value
-                            tmp = i
+        if len(self.deck) > 0:
+            best_move = EarlyGame(current_state)
+            index = -1
+            if best_move.best_move[0] == -1:
+                self.bita()
+            elif best_move.best_move[0] == -2:
+                self.take(self.comp, False, True)
             else:
-                for i in range(len(self.comp)):
-                    for j in range(len(self.board)):
-                        if self.comp[i].value == self.board[j].value:
-                            if self.comp[i].value < min_card:
-                                min_card = self.comp[i].value
-                                tmp = i
-        return tmp"""
+                index = best_move.best_move[1]
+            return index
+        else:
+            best_move = AI.minimax(current_state, 15)
+            index = -1
+            if best_move.index == -1:
+                self.bita()
+            elif best_move.index == -2:
+                self.take(self.comp, False, True)
+            else:
+                index = best_move.index
+            return index
 
     def legal(self):
         # checks to see if the move that was made is legal by the game rules
@@ -561,6 +550,33 @@ class Game(Layout):
                 self.added = self.added - 1
 
     @staticmethod
+    def popup_start(touch):
+
+        popup = Popup(title='Instructions',
+                      content=Label(text="Card Rank: \nHighest to lowest - A, K, Q, J, 10, 9, 8, 7, 6 \n \n"
+                      "Objective: \nThe objective of the game is to avoid being the last player with cards. \n \n"
+                      "Losing: \nThe last player still with cards is the loser \n \n"
+                      "Playing: \nDrag the card you want to use to the center of the board and release it\n\n"
+                      "Rules: \nDefending cards must be higher than the attacking card with the same symbol\nor it can "
+                      "be a koser with any value as ling as the attacking card isn't a koser if it "
+                      "is the first rule applies\n\n"
+                      "Attacking cards should be with the same value as one of the cards that are already on the board"
+                      "\nif there aren't any cards on the board, any card can be placed on the board\n\n"
+                      "Bita:\nThe attacking  player can choose bita if he doesn't want or can add any more cards\n\n"
+                      "Take:\nThe defending player can choose take if he doesn't want or can defebd against the attack"
+                      "\n\nKoser:\nKoser is the symbol that appears on the card bellow the deck,\n"
+                      "it can also be found above the deck through out the whole game,\nany card that has the same"
+                      " symbol as the koser is higher in value then non koser cards\nso it can beat any non koser card"
+                      "\n\nTo close instructions click anywhere on the screen that isn't the popup"
+                                    ),
+                      size_hint=(None, None),
+                      pos_hint={'right': .735, 'bottom': 1},
+                      size=(1400, 1300))
+        popup.open()  #After turn: \n"
+                      #"After an attack, players will draw cards to return their hands to at least six cards\n"
+                      #"The original attacker draws first, then the defender if needed
+
+    @staticmethod
     def popup_invalid():
         print("Not a valid move, please try again")
         popup = Popup(title='                       Not a valid move',
@@ -584,7 +600,7 @@ class Game(Layout):
 
     @staticmethod
     def popup_player_first():
-        print("The computer is making the first move")
+        print("The player is making the first move")
         popup = Popup(title='                           You go first',
                       content=Label(text='   You have the lowest Koser'),
                       size_hint=(None, None),
@@ -743,7 +759,7 @@ class Game(Layout):
                     self.comp_durak()
                 elif won == 2:  # if the player lost
                     self.player_durak()
-
+        
 
 class DurakApp(App):
     def build(self):

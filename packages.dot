@@ -1,0 +1,24 @@
+digraph "packages" {
+rankdir=BT
+charset="utf-8"
+"Card" [color="black", label="Card", shape="box", style="solid"];
+"Durak.kv" [color="red", label="Durak.kv", shape="box", style="solid"];
+"CompressCard" [color="black", label="CompressCard", shape="box", style="solid"];
+"EarlyGame" [color="black", label="EarlyGame", shape="box", style="solid"];
+"Game" [color="black", label="Game", shape="box", style="solid"];
+"MinMax" [color="black", label="MinMax", shape="box", style="solid"];
+"State" [color="black", label="State", shape="box", style="solid"];
+"Game" -> "Card" [arrowhead="open", dir="forward", arrowtail="open"];
+"Card" -> "Game" [arrowhead="open", dir="forward", arrowtail="open"];
+"MinMax" -> "CompressCard" [arrowhead="open", dir="forward", arrowtail="open"];
+"CompressCard" -> "MinMax" [arrowhead="open", dir="forward", arrowtail="open"];
+"Game" -> "EarlyGame" [arrowhead="open", dir="forward", arrowtail="open"];
+"EarlyGame" -> "Game" [arrowhead="open", dir="forward", arrowtail="open"];
+"Game" -> "MinMax" [arrowhead="open", dir="forward", arrowtail="open"];
+"MinMax" -> "Game" [arrowhead="open", dir="forward", arrowtail="open"];
+"Game" -> "State" [arrowhead="open", dir="forward", arrowtail="open"];
+"State" -> "Game" [arrowhead="open", dir="forward", arrowtail="open"];
+"State" -> "CompressCard" [arrowhead="open", dir="forward", arrowtail="open"];
+"CompressCard" -> "State" [arrowhead="open", dir="forward", arrowtail="open"];
+"Game" -> "Durak.kv" [arrowhead="open", dir="forward"];
+}
