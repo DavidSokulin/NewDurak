@@ -34,13 +34,13 @@ class Card(Scatter):
         self.y = y
 
     def hide_cards(self):  # hides the cards so that the player can't see them and locks them so he can't move them
-        self.do_translation = False
+        """self.do_translation = False
         name = "Images/0.png"  # defines the file name that contains this card
-        image = Image(source=name)
-        # remove comment and place the 2 lines above in a comment to reveal the computers cards
-        """name = "Images/" + str(self.kind) + "_" + str(
-            self.value) + ".png"  # defines the file name that contains this card
         image = Image(source=name)"""
+        # remove comment and place the 2 lines above in a comment to reveal the computers cards
+        name = "Images/" + str(self.kind) + "_" + str(
+            self.value) + ".png"  # defines the file name that contains this card
+        image = Image(source=name)
         self.add_widget(image)  # adding the image
 
     def unhide_cards(self):  # unhides the cards so that the player can see them

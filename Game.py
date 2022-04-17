@@ -30,7 +30,7 @@ class Game(Layout):
         self.distribute_cards()
         self.set_koser()
         self.board = []  # list of cards that represents the cards on the board
-        self.not_in_game = []  # cards that arent in the game
+        self.not_in_game = []  # cards that aren't in the game
         self.update_all_loc()
         self.create_buttons()
         self.create_instructions_button()
@@ -478,7 +478,7 @@ class Game(Layout):
 
     def find_move(self):  # returns the index of the card that the computer plays or -1 if there is no option to play
         current_state = State(self.board, self.player, self.comp, self.not_in_game, self.deck,
-                              self.turn, self.attacker, self.koser, self.bottom_card)
+                                      self.turn, self.attacker, self.koser, self.bottom_card)
         if len(self.deck) > 0:
             best_move = EarlyGame(current_state)
             index = -1
@@ -490,7 +490,7 @@ class Game(Layout):
                 index = best_move.best_move[1]
             return index
         else:
-            best_move = AI.minimax(current_state, 15)
+            best_move = AI.minimax(current_state)
             index = -1
             if best_move.index == -1:
                 self.bita()
@@ -499,6 +499,40 @@ class Game(Layout):
             else:
                 index = best_move.index
             return index
+        """min_card = 15
+        tmp = -1
+        if self.attacker:
+            for i in range(len(self.comp)):
+                if self.comp[i].kind == self.board[-1].kind:
+                    if self.comp[i].value > self.board[-1].value:
+                        if self.comp[i].value < min_card:
+                            min_card = self.comp[i].value
+                            tmp = i
+            if min_card == 15 and not self.board[-1].kind == self.koser:
+                for i in range(len(self.comp)):
+                    if self.comp[i].kind == self.koser and self.comp[i].value < min_card:
+                        min_card = self.comp[i].value
+                        tmp = i
+        else:
+            if len(self.board) == 0:
+                for i in range(len(self.comp)):
+                    if not self.comp[i].kind == self.koser:
+                        if self.comp[i].value < min_card:
+                            min_card = self.comp[i].value
+                            tmp = i
+                if tmp == -1:
+                    for i in range(len(self.comp)):
+                        if self.comp[i].value < min_card:
+                            min_card = self.comp[i].value
+                            tmp = i
+            else:
+                for i in range(len(self.comp)):
+                    for j in range(len(self.board)):
+                        if self.comp[i].value == self.board[j].value:
+                            if self.comp[i].value < min_card:
+                                min_card = self.comp[i].value
+                                tmp = i
+        return tmp"""
 
     def legal(self):
         # checks to see if the move that was made is legal by the game rules
