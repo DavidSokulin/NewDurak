@@ -66,12 +66,13 @@ class Game(Layout):
 
     def create_instructions_button(self):
         # Creates two buttons - Bita and take, they are displayed on the left side of the screen
-        inst = Button(text='Instructions', font_size=20)
+        inst = Button(text='Instructions', font_size=33)
         inst.x = 2490  # x coordinate of the button
-        inst.y = 1300  # y coordinate of the button
-        inst.color = (0, 0, 0, 1)  # color of the button
-        inst.background_normal = "Images/Red.png"  # Green Bita button
-        inst.size = (150, 150)  # size of the button
+        inst.y = 1252.5  # y coordinate of the button
+        inst.color = (1, 1, 1, 1)  # color of the button
+        inst.bold = True
+        inst.background_normal = "Images/Blue.png"  # Green Bita button
+        inst.size = (250, 250)  # size of the button
         inst.border = (0, 0, 0, 0)  # Fix for bug in kivy that distorts the image if border isn't set this way
         inst.bind(on_press=self.popup_start)
         self.add_widget(inst)
